@@ -11,12 +11,23 @@ pip install pygame
 ```
 
 # How to contribute
-Follow this project board to know the latest status of the project: [http://...]([http://...])  
+- We welcome contributions! Follow the steps below:
+- Check the Project Board
+- Stay updated on the latest project progress
+- Fork & Clone the Repository
+- Create a New Branch
+- Make Changes & Commit
+- Push & Create a Pull Request
+- Then, open a pull request on GitHub.
+
+
 
 ### How to build
-- Use this github repository: ... 
-- Specify what branch to use for a more stable release or for cutting edge development.  
-- Use InteliJ 11
-- Specify additional library to download if needed 
-- What file and target to compile and run. 
-- What is expected to happen when the app start. 
+- To build and modify this project:
+- Use this GitHub Repository: [This Repository](https://github.com/cis3296s25/Brickbreaker-together)
+- main branch → Stable releases
+- Use VSCode or any python IDE
+- Must install pygame
+- Run main.py
+- The game window will launch after you run the game
+- Enjoy!
