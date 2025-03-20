@@ -3,14 +3,12 @@ Put here a short paragraph describing your project.
 Adding an screenshot or a mockup of your application in action would be nice.  
 
 ![This is a screenshot.](images.png)
-# How to run
-Provide here instructions on how to use your application.   
+# How to run 
 - Download the latest binary from the Release section on the right on GitHub.
 - Ensure you have Python and Pygame installed. You can install Pygame using:
 ```
 pip install pygame
 ```
-- You will see Hello World! on your terminal. 
 
 # How to contribute
 Follow this project board to know the latest status of the project: [http://...]([http://...])  
