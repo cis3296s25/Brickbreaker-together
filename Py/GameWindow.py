@@ -57,6 +57,37 @@ class Game:
                 brick_x = start_x + col * (BRICK_WIDTH + 10)
                 brick_y = 145 + row * (BRICK_HEIGHT + 10)
                 BRICKS.append(pygame.Rect(brick_x, brick_y, BRICK_WIDTH, BRICK_HEIGHT))
+    def move_ball(self):
+        if not self.lives:
+            return
+
+        self.ball.x += self.ball_dx
+        self.ball.y += self.ball_dy
+
+        # Bounce off left and right walls
+        if self.ball.left <= 0 or self.ball.right >= WIDTH:
+            self.ball_dx = -self.ball_dx
+
+        # Bounce off top wall
+        if self.ball.top <= 0:
+            self.ball_dy = -self.ball_dy
+
+        # Bounce off paddle
+        if self.ball.colliderect(self.paddle):
+            self.ball_dy = -self.ball_dy
+
+        # Bounce off bricks
+        for brick in self.bricks[:]:
+            if self.ball.colliderect(brick):
+                self.bricks.remove(brick)
+                self.ball_dy = -self.ball_dy
+                self.score += 10
+                break
+
+        # If ball goes below paddle
+        if self.ball.top >= HEIGHT:
+            self.lives -= 1
+            self.reset_ball()
     
     def draw_bricks(self):
         for brick in BRICKS:
