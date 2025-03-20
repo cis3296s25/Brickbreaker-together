@@ -104,7 +104,17 @@ class Game:
                         self.game_active = not self.game_active
                     if event.key == pygame.K_ESCAPE:
                         running = False
-            
+            # use left and right key to move the paddle
+                        keys = pygame.key.get_pressed()
+                        if keys[pygame.K_LEFT]:
+                            self.paddle.x = max(80, self.paddle.x - 7)  # Limit to left game border
+                        if keys[pygame.K_RIGHT]:
+                            self.paddle.x = min(WIDTH - 160 - PADDLE_WIDTH, self.paddle.x + 7)  # Limit to right game border
+
+                        # ball will stick with paddle before the game start
+                        if not self.game_active:
+                            self.ball.centerx = self.paddle.centerx
+                            self.ball.bottom = self.paddle.top
             screen.fill(BACKGROUND_COLOR)
             self.draw_ui()
             self.draw_bricks()
