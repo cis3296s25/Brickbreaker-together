@@ -12,7 +12,7 @@ pip install pygame
 
 # How to contribute
 - We welcome contributions! Follow the steps below:
-- Check the Project Board
+- Check the [Project Board](https://github.com/orgs/cis3296s25/projects/67)
 - Stay updated on the latest project progress
 - Fork & Clone the Repository
 - Create a New Branch
