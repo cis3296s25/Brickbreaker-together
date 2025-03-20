@@ -10,7 +10,7 @@ BACKGROUND_COLOR = (18, 18, 18)  # Dark gray/black
 UI_BACKGROUND = (30, 30, 30)  # Slightly lighter black background
 TEXT_COLOR = (255, 255, 255)  # White
 LIFE_COLOR = (231, 76, 60)  # Red
-BRICK_COLOR = (241, 196, 15)  # Yellow
+BRICK_COLOR = (241, 196, 15)  # White
 
 # Set game window
 WIDTH, HEIGHT = 800, 600
@@ -55,7 +55,7 @@ class Game:
         for row in range(ROWS):
             for col in range(COLS):
                 brick_x = start_x + col * (BRICK_WIDTH + 10)
-                brick_y = 140 + row * (BRICK_HEIGHT + 10)
+                brick_y = 145 + row * (BRICK_HEIGHT + 10)
                 BRICKS.append(pygame.Rect(brick_x, brick_y, BRICK_WIDTH, BRICK_HEIGHT))
     
     def draw_bricks(self):
