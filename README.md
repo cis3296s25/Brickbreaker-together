@@ -1,5 +1,5 @@
 # Brickbreaker Together
-Put here a short paragraph describing your project. 
+A multiplayer BrickBreaker game developed using PyGame, a Python library for game development. The game is designed specifically for Windows systems and follows a client-server architecture.
 Adding an screenshot or a mockup of your application in action would be nice.  
 
 ![This is a screenshot.](images.png)
