@@ -1,18 +1,14 @@
-# Project Name
+# Brickbreaker Together
 Put here a short paragraph describing your project. 
 Adding an screenshot or a mockup of your application in action would be nice.  
 
 ![This is a screenshot.](images.png)
 # How to run
 Provide here instructions on how to use your application.   
-- Download the latest binary from the Release section on the right on GitHub.  
-- On the command line uncompress using
+- Download the latest binary from the Release section on the right on GitHub.
+- Ensure you have Python and Pygame installed. You can install Pygame using:
 ```
-tar -xzf  
-```
-- On the command line run with
-```
-./hello
+pip install pygame
 ```
 - You will see Hello World! on your terminal. 
 
