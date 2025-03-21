@@ -1,5 +1,7 @@
 import pygame
 import sys
+import random
+import math
 
 # Initialize pygame
 pygame.init()
@@ -50,7 +52,7 @@ class Game:
         self.create_bricks()
         self.ball_dx = 4
         self.ball_dy = -4
-        
+
     def create_bricks(self):
         global BRICKS
         BRICKS = []
@@ -90,10 +92,13 @@ class Game:
             self.reset_ball()
             
     def reset_ball(self):
-        self.ball.x = WIDTH // 2
-        self.ball.y = HEIGHT - 80
-        self.ball_dx = 4
-        self.ball_dy = -4
+        #shoots at random directions each time
+        self.ball.centerx = self.paddle.centerx
+        self.ball.bottom = self.paddle.top
+        angle = random.uniform(-math.pi / 4, math.pi / 4)  # Random angle between -45° and +45°
+        speed = 5
+        self.ball_dx = speed * math.cos(angle)
+        self.ball_dy = -abs(speed * math.sin(angle))  # Ensure the ball starts moving upward
         
     def draw_bricks(self):
         for brick in BRICKS:
