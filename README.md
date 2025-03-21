@@ -9,6 +9,14 @@ Adding an screenshot or a mockup of your application in action would be nice.
 ```
 pip install pygame
 ```
+- Clone This Repository
+- Open a terminal
+- Navigate to the \Py Folder in the terminal
+- Run the Following command
+```
+python GameWindow.Py
+```
+-Enjoy!
 
 # How to contribute
 - We welcome contributions! Follow the steps below:
