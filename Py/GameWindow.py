@@ -88,7 +88,12 @@ class Game:
         if self.ball.top >= HEIGHT:
             self.lives -= 1
             self.reset_ball()
-    
+    def reset_ball(self):
+        self.ball.x = WIDTH // 2
+        self.ball.y = HEIGHT - 80
+        self.ball_dx = 4
+        self.ball_dy = -4
+        
     def draw_bricks(self):
         for brick in BRICKS:
             pygame.draw.rect(screen, BRICK_COLOR, brick)
