@@ -2,6 +2,13 @@
 A multiplayer BrickBreaker game developed using PyGame, a Python library for game development. The game is designed specifically for Windows systems and follows a client-server architecture.
 Adding an screenshot or a mockup of your application in action would be nice.  
 
+## Game features
+> MultiPlayer
+> power ups
+> some bricks/blocks are stronger
+> last life, possibly buy powerups in between rounds 
+> three lives
+
 ![This is a screenshot.](images.png)
 # How to run 
 - Download the latest binary from the Release section on the right on GitHub.
