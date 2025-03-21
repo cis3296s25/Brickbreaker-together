@@ -1,5 +1,7 @@
 import pygame
 import sys
+import random
+import math
 
 # Initialize pygame
 pygame.init()
@@ -48,7 +50,9 @@ class Game:
         self.paddle = pygame.Rect((WIDTH // 2 - PADDLE_WIDTH // 2, PADDLE_Y, PADDLE_WIDTH, PADDLE_HEIGHT))
         self.ball = pygame.Rect((self.paddle.centerx - BALL_RADIUS, PADDLE_Y - BALL_RADIUS * 2, BALL_RADIUS * 2, BALL_RADIUS * 2))
         self.create_bricks()
-    
+        self.ball_dx = 4
+        self.ball_dy = -4
+
     def create_bricks(self):
         global BRICKS
         BRICKS = []
@@ -57,7 +61,45 @@ class Game:
                 brick_x = start_x + col * (BRICK_WIDTH + 10)
                 brick_y = 145 + row * (BRICK_HEIGHT + 10)
                 BRICKS.append(pygame.Rect(brick_x, brick_y, BRICK_WIDTH, BRICK_HEIGHT))
-    
+    def move_ball(self):
+        if not self.game_active:
+            return
+
+        self.ball.x += self.ball_dx
+        self.ball.y += self.ball_dy
+
+        # Bounce off walls
+        if self.ball.left <= 80 or self.ball.right >= WIDTH - 80:
+            self.ball_dx = -self.ball_dx
+        if self.ball.top <= 140:
+            self.ball_dy = -self.ball_dy
+
+        # Bounce off paddle
+        if self.ball.colliderect(self.paddle):
+            self.ball_dy = -self.ball_dy
+
+        # Bounce off bricks
+        for brick in BRICKS[:]:
+            if self.ball.colliderect(brick):
+                BRICKS.remove(brick)
+                self.ball_dy = -self.ball_dy
+                self.score += 10
+                break
+
+        # If ball falls below paddle
+        if self.ball.top >= HEIGHT:
+            self.lives -= 1
+            self.reset_ball()
+            
+    def reset_ball(self):
+        #shoots at random directions each time
+        self.ball.centerx = self.paddle.centerx
+        self.ball.bottom = self.paddle.top
+        angle = random.uniform(-math.pi / 4, math.pi / 4)  # Random angle between -45° and +45°
+        speed = 5
+        self.ball_dx = speed * math.cos(angle)
+        self.ball_dy = -abs(speed * math.sin(angle))  # Ensure the ball starts moving upward
+        
     def draw_bricks(self):
         for brick in BRICKS:
             pygame.draw.rect(screen, BRICK_COLOR, brick)
@@ -120,7 +162,8 @@ class Game:
             self.draw_bricks()
             self.draw_paddle()
             self.draw_ball()
-            
+            self.move_ball()
+
             pygame.display.flip()
             clock.tick(60)
         
