@@ -48,7 +48,9 @@ class Game:
         self.paddle = pygame.Rect((WIDTH // 2 - PADDLE_WIDTH // 2, PADDLE_Y, PADDLE_WIDTH, PADDLE_HEIGHT))
         self.ball = pygame.Rect((self.paddle.centerx - BALL_RADIUS, PADDLE_Y - BALL_RADIUS * 2, BALL_RADIUS * 2, BALL_RADIUS * 2))
         self.create_bricks()
-    
+        self.ball_dx = 4
+        self.ball_dy = -4
+        
     def create_bricks(self):
         global BRICKS
         BRICKS = []
@@ -58,18 +60,16 @@ class Game:
                 brick_y = 145 + row * (BRICK_HEIGHT + 10)
                 BRICKS.append(pygame.Rect(brick_x, brick_y, BRICK_WIDTH, BRICK_HEIGHT))
     def move_ball(self):
-        if not self.lives:
+        if not self.game_active:
             return
 
         self.ball.x += self.ball_dx
         self.ball.y += self.ball_dy
 
-        # Bounce off left and right walls
-        if self.ball.left <= 0 or self.ball.right >= WIDTH:
+        # Bounce off walls
+        if self.ball.left <= 80 or self.ball.right >= WIDTH - 80:
             self.ball_dx = -self.ball_dx
-
-        # Bounce off top wall
-        if self.ball.top <= 0:
+        if self.ball.top <= 140:
             self.ball_dy = -self.ball_dy
 
         # Bounce off paddle
@@ -77,17 +77,18 @@ class Game:
             self.ball_dy = -self.ball_dy
 
         # Bounce off bricks
-        for brick in self.bricks[:]:
+        for brick in BRICKS[:]:
             if self.ball.colliderect(brick):
-                self.bricks.remove(brick)
+                BRICKS.remove(brick)
                 self.ball_dy = -self.ball_dy
                 self.score += 10
                 break
 
-        # If ball goes below paddle
+        # If ball falls below paddle
         if self.ball.top >= HEIGHT:
             self.lives -= 1
             self.reset_ball()
+            
     def reset_ball(self):
         self.ball.x = WIDTH // 2
         self.ball.y = HEIGHT - 80
@@ -156,7 +157,8 @@ class Game:
             self.draw_bricks()
             self.draw_paddle()
             self.draw_ball()
-            
+            self.move_ball()
+
             pygame.display.flip()
             clock.tick(60)
         
