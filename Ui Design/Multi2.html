@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRICKBREAKER TOGETHER</title>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2ecc71;
+      --background-color: #121212;
+      --ui-background: rgba(18, 18, 18, 0.85);
+      --text-color: #ffffff;
+      --accent-color: #e74c3c;
+      --player1-color: #3498db;
+      --player2-color: #e74c3c;
+      --border-radius: 12px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.1) 0%, transparent 50%);
+    }
+
+    h1 {
+      margin: 30px 0;
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--player1-color), var(--player2-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .tagline {
+      font-size: 16px;
+      opacity: 0.7;
+      margin-top: -25px;
+      margin-bottom: 30px;
+      letter-spacing: 1px;
+    }
+
+    #game-container {
+      display: flex;
+      width: 95%;
+      max-width: 900px;
+      gap: 15px;
+    }
+
+    .player-ui {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 200px;
+      height: 500px;
+      background: var(--ui-background);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    #player1-ui {
+      border-top: 2px solid var(--player1-color);
+    }
+
+    #player2-ui {
+      border-top: 2px solid var(--player2-color);
+    }
+
+    .ui-section {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .player-label {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    #player1-label {
+      color: var(--player1-color);
+      text-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+
+    #player2-label {
+      color: var(--player2-color);
+      text-shadow: 0 0 5px rgba(231, 76, 60, 0.3);
+    }
+
+    .score {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+
+    .score-label {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .lives-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .life {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    #player1-lives .life {
+      background-color: var(--player1-color);
+    }
+
+    #player2-lives .life {
+      background-color: var(--player2-color);
+    }
+
+    .game-box {
+      width: 800px;
+      height: 500px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .paddle {
+      position: absolute;
+      width: 100px;
+      height: 20px;
+      border-radius: 10px;
+      left: 250px;
+    }
+
+    #paddle-top {
+      top: 20px;
+      background-color: var(--player1-color);
+      box-shadow: 0 0 15px rgba(52, 152, 219, 0.4);
+    }
+
+    #paddle-bottom {
+      bottom: 20px;
+      background-color: var(--player2-color);
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    }
+
+    .ball {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+
+    #ball1 {
+      top: 60px;
+      left: 290px;
+      background-color: var(--player1-color);
+      box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
+    }
+
+    #ball2 {
+      bottom: 60px;
+      left: 290px;
+      background-color: var(--player2-color);
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+    }
+
+    #bricks-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      height: 200px;
+    }
+
+    .brick {
+      position: absolute;
+      width: 70px;
+      height: 30px;
+      border-radius: 4px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-color);
+      transition: all 0.2s ease;
+      margin: 0 auto;
+      margin-top: 20px;
+    }
+
+    .control-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 14px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>BRICKBREAKER</h1>
+  <div class="tagline">TOGETHER</div>
+
+  <div id="game-container">
+    <!-- Player 1 UI -->
+    <div id="player1-ui" class="player-ui">
+      <div class="ui-section">
+        <div id="player1-label" class="player-label">PLAYER 1</div>
+        <div class="score">0000</div>
+      </div>
+
+      <div class="ui-section">
+        <div id="player1-lives" class="lives-container">
+          <div class="life"></div>
+          <div class="life"></div>
+          <div class="life"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-box">
+      <div class="paddle" id="paddle-top"></div>
+      <div class="paddle" id="paddle-bottom"></div>
+
+      <div class="ball" id="ball1"></div>
+      <div class="ball" id="ball2"></div>
+
+      <div id="bricks-container">
+        <!-- Bricks generated statically -->
+        <div class="brick" style="left: 0px; top: 0px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 80px; top: 0px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 160px; top: 0px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 240px; top: 0px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 320px; top: 0px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 400px; top: 0px; background-color: #f39c12;"></div>
+
+        <div class="brick" style="left: 0px; top: 40px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 80px; top: 40px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 160px; top: 40px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 240px; top: 40px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 320px; top: 40px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 400px; top: 40px; background-color: #f39c12;"></div>
+
+        <div class="brick" style="left: 0px; top: 80px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 80px; top: 80px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 160px; top: 80px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 240px; top: 80px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 320px; top: 80px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 400px; top: 80px; background-color: #f39c12;"></div>
+
+        <div class="brick" style="left: 0px; top: 120px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 80px; top: 120px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 160px; top: 120px; background-color: #f39c12"></div>
+        <div class="brick" style="left: 240px; top: 120px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 320px; top: 120px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 400px; top: 120px; background-color: #f39c12;"></div>
+
+        <div class="brick" style="left: 0px; top: 160px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 80px; top: 160px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 160px; top: 160px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 240px; top: 160px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 320px; top: 160px; background-color: #f39c12;"></div>
+        <div class="brick" style="left: 400px; top: 160px; background-color: #f39c12;"></div>
+      </div>
+    </div>
+
+    <!-- Player 2 UI -->
+    <div id="player2-ui" class="player-ui">
+      <div class="ui-section">
+        <div id="player2-label" class="player-label">PLAYER 2</div>
+        <div class="score">0000</div>
+
+      </div>
+
+      <div class="ui-section">
+        <div id="player2-lives" class="lives-container">
+          <div class="life"></div>
+          <div class="life"></div>
+          <div class="life"></div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+</body>
+
+</html>
