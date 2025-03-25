@@ -16,6 +16,7 @@ class Game:
         self.lives = 3
         self.ui = UI()
         self.running = True
+        self.waiting_for_start = True
 
     def handle_events(self):
         keys = pygame.key.get_pressed()
@@ -25,7 +26,10 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.ball.reset(self.paddle)
+                if self.waiting_for_start:
+                    self.waiting_for_start = False
+                else:
+                    self.ball.reset(self.paddle)
 
     def update(self):
         result = self.ball.move(self.paddle, self.bricks)
@@ -46,25 +50,6 @@ class Game:
             brick.draw(self.screen)
         self.ui.draw(self.screen, self.score, self.lives)
 
-    def start_screen(self):
-        font = pygame.font.Font(None, 72)
-        start_text = font.render("Press SPACE to Start", True, PRIMARY_COLOR)
-        rect = start_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-
-        button_rect = pygame.Rect(rect.left - 20, rect.top - 20, rect.width + 40, rect.height + 40)
-
-        while True:
-            self.screen.fill(BACKGROUND_COLOR)
-            pygame.draw.rect(self.screen, (50, 50, 50), button_rect, border_radius=8)
-            self.screen.blit(start_text, rect)
-            pygame.display.flip()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    return
 
     def game_over(self):
         font = pygame.font.Font(None, 72)
@@ -99,11 +84,11 @@ class Game:
                        for x in range(COLS) for y in range(ROWS)]
 
     def run(self):
-        self.start_screen()  # Show start screen first
         clock = pygame.time.Clock()
         while self.running:
             self.handle_events()
-            self.update()
+            if not self.waiting_for_start:
+                self.update()
             self.draw()
             pygame.display.flip()
             clock.tick(60)
