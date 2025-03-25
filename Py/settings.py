@@ -1,0 +1,20 @@
+# settings.py
+WIDTH, HEIGHT = 800, 600
+
+# Colors
+PRIMARY_COLOR = (52, 152, 219)
+BACKGROUND_COLOR = (18, 18, 18)
+LIFE_COLOR = (231, 76, 60)
+BRICK_COLOR = (241, 196, 15)
+
+# Paddle settings
+PADDLE_WIDTH, PADDLE_HEIGHT = 100, 10
+PADDLE_Y = HEIGHT - 70
+
+# Ball settings
+BALL_RADIUS = 8
+BALL_SPEED = 5
+
+# Brick settings
+ROWS, COLS = 6, 10
+BRICK_WIDTH, BRICK_HEIGHT = 54, 20
