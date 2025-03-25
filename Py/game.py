@@ -1,12 +1,13 @@
-import pygame
 from settings import *
+import pygame
 from paddle import Paddle
 from ball import Ball
 from brick import Brick
 from ui import UI
 
 class Game:
-    def __init__(self):
+    def __init__(self, screen):
+        self.screen = screen
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
         self.bricks = [Brick(x * (BRICK_WIDTH + 10) + 80, y * (BRICK_HEIGHT + 10) + 150)
@@ -33,22 +34,35 @@ class Game:
         elif result == -1:
             self.lives -= 1
             if self.lives <= 0:
-                self.running = False
+                # Show game over screen instead of quitting
+                self.game_over()
+            else:
+                # Reset ball position if lives are remaining
+                self.ball.reset(self.paddle)
 
-    def draw(self, screen):
-        screen.fill(BACKGROUND_COLOR)
-        self.paddle.draw(screen)
-        self.ball.draw(screen)
+    def game_over(self):
+        font = pygame.font.Font(None, 72)
+        game_over_text = font.render("GAME OVER", True, PRIMARY_COLOR)
+        self.screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2))
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Wait 2 seconds before quitting
+        self.running = False
+
+
+
+    def draw(self):
+        self.screen.fill(BACKGROUND_COLOR)
+        self.paddle.draw(self.screen)
+        self.ball.draw(self.screen)
         for brick in self.bricks:
-            brick.draw(screen)
-        self.ui.draw(screen, self.score, self.lives)
+            brick.draw(self.screen)
+        self.ui.draw(self.screen, self.score, self.lives)
 
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
             self.handle_events()
             self.update()
-            self.draw(screen)
+            self.draw()
             pygame.display.flip()
             clock.tick(60)
-

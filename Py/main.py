@@ -1,9 +1,13 @@
 import pygame
+from settings import *
 from game import Game
+
 
 def main():
     pygame.init()
-    game = Game()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("BrickBreaker")
+    game = Game(screen)
     game.run()
     pygame.quit()
 

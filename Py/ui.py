@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 
+
 class UI:
     def __init__(self):
         self.font_large = pygame.font.Font(None, 42)
