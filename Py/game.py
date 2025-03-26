@@ -48,8 +48,8 @@ class Game:
                     self.isGameInProgress = True
                     self.isPaused = False
                     self.ball.reset(self.paddle)
-                elif self.isGameInProgress:
-                    # Toggle pause during gameplay
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.ui.check_button_click(event.pos) and self.isGameInProgress:
                     self.isPaused = not self.isPaused
 
     def update(self):
