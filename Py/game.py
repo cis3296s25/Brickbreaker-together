@@ -30,30 +30,40 @@ class Game:
         self.ui = UI()
         self.running = True
         self.waiting_for_start = True
+        self.isGameInProgress = False
+        self.isPaused = False
 
     def handle_events(self):
         keys = pygame.key.get_pressed()
-        self.paddle.move(keys)
+        if self.isGameInProgress and not self.isPaused:
+            self.paddle.move(keys)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if self.waiting_for_start:
+                    # Start the game for the first time
                     self.waiting_for_start = False
-                else:
+                    self.isGameInProgress = True
+                    self.isPaused = False
                     self.ball.reset(self.paddle)
+                elif self.isGameInProgress:
+                    # Toggle pause during gameplay
+                    self.isPaused = not self.isPaused
 
     def update(self):
-        result = self.ball.move(self.paddle, self.bricks)
-        if result == 10:
-            self.score += 10
-        elif result == -1:
-            self.lives -= 1
-            if self.lives <= 0:
-                self.game_over()
-            else:
-                self.ball.reset(self.paddle)
+        if self.isGameInProgress and not self.isPaused:
+            
+            result = self.ball.move(self.paddle, self.bricks)
+            if result == 10:
+                self.score += 10
+            elif result == -1:
+                self.lives -= 1
+                if self.lives <= 0:
+                    self.game_over()
+                else:
+                    self.ball.reset(self.paddle)
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -115,7 +125,7 @@ class Game:
         clock = pygame.time.Clock()
         while self.running:
             self.handle_events()
-            if not self.waiting_for_start:
+            if self.isGameInProgress and not self.isPaused and not self.waiting_for_start:
                 self.update()
             self.draw()
             pygame.display.flip()
