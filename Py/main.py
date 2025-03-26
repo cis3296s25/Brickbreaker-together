@@ -1,15 +1,12 @@
 import pygame
 from settings import *
 from game import Game
-
+from mainmenu import BrickBreakerMenu
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("BrickBreaker")
-    game = Game(screen)
-    game.run()
-    pygame.quit()
+    menu = BrickBreakerMenu()
+    menu.run()
 
 if __name__ == "__main__":
     main()
