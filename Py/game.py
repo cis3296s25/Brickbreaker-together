@@ -1,5 +1,6 @@
-from settings import *
 import pygame
+import random
+from settings import *
 from paddle import Paddle
 from ball import Ball
 from brick import Brick
@@ -10,8 +11,20 @@ class Game:
         self.screen = screen
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
-        self.bricks = [Brick(x * (BRICK_WIDTH + 10) + 80, y * (BRICK_HEIGHT + 10) + 150)
-                       for x in range(COLS) for y in range(ROWS)]
+        
+        # brick colors
+        self.brick_colors = [
+            (231, 76, 60),   # red
+            (230, 126, 34),  # orange
+            (241, 196, 15),  # yellow
+            (46, 204, 113),  # green
+            (52, 152, 219),  # light green  
+            (41, 128, 185),  # blue
+            (155, 89, 182),  # purple
+            (243, 104, 224)  # pink
+        ]
+        
+        self.create_bricks()
         self.score = 0
         self.lives = 3
         self.ui = UI()
@@ -76,12 +89,27 @@ class Game:
                         self.running = False
                         waiting = False
 
+    def create_bricks(self):
+        # copy the brick colors and shuffle them
+        available_colors = self.brick_colors.copy()
+        random.shuffle(available_colors)
+        
+        # create bricks,and make sure there is at least one brick of each color in the first 4 rows
+        self.bricks = []
+        for y in range(ROWS):
+            row_color = available_colors[y]  # each row has a different color
+            for x in range(COLS):
+                self.bricks.append(
+                    Brick(x * (BRICK_WIDTH + 10) + 80, 
+                         y * (BRICK_HEIGHT + 10) + 150,
+                         row_color)
+                )
+
     def reset_game(self):
         self.lives = 3
         self.score = 0
         self.ball.reset(self.paddle)
-        self.bricks = [Brick(x * (BRICK_WIDTH + 10) + 80, y * (BRICK_HEIGHT + 10) + 150)
-                       for x in range(COLS) for y in range(ROWS)]
+        self.create_bricks()  
 
     def run(self):
         clock = pygame.time.Clock()
