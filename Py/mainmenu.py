@@ -50,8 +50,15 @@ class FloatingBrick:
 
 class BrickBreakerMenu:
     def __init__(self):
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # get the screen size
+        info = pygame.display.Info()
+        self.screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
         pygame.display.set_caption("BrickBreaker Together")
+        
+        # update screen size
+        global SCREEN_WIDTH, SCREEN_HEIGHT
+        SCREEN_WIDTH = info.current_w
+        SCREEN_HEIGHT = info.current_h
         
         # Fonts
         self.title_font = pygame.font.SysFont('Segoe UI', 80, bold=True)
@@ -165,6 +172,11 @@ class BrickBreakerMenu:
                 if event.type == pygame.QUIT:
                     running = False
                 
+                # esc to quit
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
                 if event.type == pygame.MOUSEMOTION:
                     mouse_pos = pygame.mouse.get_pos()
                     menu_width = 500
