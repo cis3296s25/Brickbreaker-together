@@ -14,14 +14,16 @@ class Game:
         
         # brick colors
         self.brick_colors = [
-            (231, 76, 60),   # red
-            (230, 126, 34),  # orange
-            (241, 196, 15),  # yellow
-            (46, 204, 113),  # green
-            (52, 152, 219),  # light green  
-            (41, 128, 185),  # blue
-            (155, 89, 182),  # purple
-            (243, 104, 224)  # pink
+            (230, 245, 255),  
+            (198, 231, 250), 
+            (166, 212, 245),  
+            (135, 191, 235),  
+            (104, 165, 222),  
+            (73, 140, 208),   
+            (44, 115, 194),  
+            (28, 98, 173),    
+            (19, 79, 149),    
+            (12, 61, 123)   
         ]
         
         self.create_bricks()
@@ -41,6 +43,10 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and self.isGameInProgress:
+                self.isPaused = not self.isPaused
+            
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if self.waiting_for_start:
                     # Start the game for the first time
@@ -48,8 +54,15 @@ class Game:
                     self.isGameInProgress = True
                     self.isPaused = False
                     self.ball.reset(self.paddle)
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.ui.check_button_click(event.pos) and self.isGameInProgress:
+                mouse_pos = event.pos
+                
+                # Check if pause button was clicked using UI method
+                if self.ui.check_pause_button_click(mouse_pos) and self.isGameInProgress:
+                    self.isPaused = not self.isPaused
+
+                elif self.ui.check_button_click(event.pos) and self.isGameInProgress:
                     self.isPaused = not self.isPaused
                 elif self.isPaused:
                     menu_action = self.ui.check_menu_click(event.pos)
@@ -76,22 +89,29 @@ class Game:
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
+        
+        # draw the container
+        self.ui.draw_container(self.screen)
+        
+        # if the game is not in progress, show the start screen
         self.paddle.draw(self.screen)
         self.ball.draw(self.screen)
         for brick in self.bricks:
             brick.draw(self.screen)
-        self.ui.draw(self.screen, self.score, self.lives, self.isPaused)
+        
+        # draw the UI elements
+        self.ui.draw_lives(self.screen, self.lives)
+        self.ui.draw_score(self.screen, self.score)
+        self.ui.draw_pause_button(self.screen, self.isPaused)
+        
+        # make sure the pause menu is on top
+        if self.isPaused:
+            self.ui.pause_menu.draw(self.screen)
 
 
     def game_over(self):
-        font = pygame.font.Font(None, 72)
-        game_over_text = font.render("GAME OVER", True, PRIMARY_COLOR)
-        restart_text = font.render("Press R to Restart", True, PRIMARY_COLOR)
-        quit_text = font.render("Press Q to Quit", True, PRIMARY_COLOR)
-
-        self.screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 50))
-        self.screen.blit(restart_text, (WIDTH // 2 - restart_text.get_width() // 2, HEIGHT // 2))
-        self.screen.blit(quit_text, (WIDTH // 2 - quit_text.get_width() // 2, HEIGHT // 2 + 50))
+        # Use the UI class to draw the game over screen
+        self.ui.draw_game_over(self.screen)
         pygame.display.flip()
 
         waiting = True
