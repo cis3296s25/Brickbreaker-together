@@ -62,10 +62,23 @@ class Ball:
 
         # Bounce off bricks
         for brick in bricks[:]:
-            if self.rect.colliderect(brick.rect):
-                bricks.remove(brick)
-                self.dy = -self.dy
-                return 10  # Score increase
+            if self.rect.colliderect(brick.rect): # Check if the brick is colliding
+                if self.rect.right >= brick.rect.left and self.rect.left < brick.rect.left:  # Ball hits right side of the brick
+                    bricks.remove(brick)
+                    self.dx = -self.dx + random.uniform(.1, 1)  # Reverse horizontal direction + speed up
+                    return 10  # Score increase
+                elif self.rect.left <= brick.rect.right and self.rect.right > brick.rect.right:  # Ball hits left side of the brick
+                    bricks.remove(brick)
+                    self.dx = -self.dx + random.uniform(.1, 1) # Reverse horizontal direction + speed up
+                    return 10  # Score increase
+                if self.rect.bottom >= brick.rect.top and self.rect.top < brick.rect.top:  # Ball hits the bottom of the brick
+                    bricks.remove(brick)
+                    self.dy = -self.dy + random.uniform(.1, 1) # Reverse vertical direction + speed up
+                    return 10  # Score increase
+                elif self.rect.top <= brick.rect.bottom and self.rect.bottom > brick.rect.bottom:  # Ball hits the top of the brick
+                    bricks.remove(brick)
+                    self.dy = -self.dy + random.uniform(.1, 1) # Reverse vertical direction + speed up
+                    return 10  # Score increase
 
         # If ball falls below paddle
         if self.rect.top >= HEIGHT:
