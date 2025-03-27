@@ -51,6 +51,15 @@ class Game:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.ui.check_button_click(event.pos) and self.isGameInProgress:
                     self.isPaused = not self.isPaused
+                elif self.isPaused:
+                    menu_action = self.ui.check_menu_click(event.pos)
+                    if menu_action == 'Continue':
+                        self.isPaused = False
+                    elif menu_action == 'Settings':
+                        # settings logic here
+                        pass
+                    elif menu_action == 'Main Menu':
+                        self.running = False
 
     def update(self):
         if self.isGameInProgress and not self.isPaused:
@@ -71,7 +80,7 @@ class Game:
         self.ball.draw(self.screen)
         for brick in self.bricks:
             brick.draw(self.screen)
-        self.ui.draw(self.screen, self.score, self.lives)
+        self.ui.draw(self.screen, self.score, self.lives, self.isPaused)
 
 
     def game_over(self):
