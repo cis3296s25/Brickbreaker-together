@@ -25,6 +25,7 @@ class Ball:
         self.rect.bottom = paddle.rect.top
 
         MIN_VERTICAL_SPEED = 2  # Prevent near-horizontal bouncing
+        MIN_HORIZONTAL_SPEED = 1.5  # Enforce minimum horizontal drifting
 
         while True:
             # Favor near-vertical shots (around 90° or π/2)
@@ -32,7 +33,7 @@ class Ball:
             dx = BALL_SPEED * math.cos(angle)
             dy = -abs(BALL_SPEED * math.sin(angle))  # Always go upward
 
-            if abs(dy) >= MIN_VERTICAL_SPEED:
+            if abs(dy) >= MIN_VERTICAL_SPEED and abs(dx) >= MIN_HORIZONTAL_SPEED:
                 break
 
         self.dx = dx
@@ -65,7 +66,15 @@ class Ball:
 
         # Bounce off paddle
         if self.rect.colliderect(paddle.rect):
-            self.dy = -self.dy
+            # Calculate hit position relative to paddle center
+            hit_pos = (self.rect.centerx - paddle.rect.centerx) / (PADDLE_WIDTH // 2)
+            angle = hit_pos * (math.pi / 3)  # Max angle deviation = 60 degrees
+
+            # Recalculate direction based on where it hit the paddle
+            speed = math.hypot(self.dx, self.dy)  # Keep the total speed constant
+            self.dx = speed * math.sin(angle)
+            self.dy = -abs(speed * math.cos(angle))  # Always bounce upward
+
 
         # Bounce off bricks
         for brick in bricks[:]:
