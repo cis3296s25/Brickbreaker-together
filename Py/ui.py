@@ -40,22 +40,10 @@ class UI:
             self.pause_menu.draw(screen)
     
     def draw_container(self, screen):
-        """Draw the game container with borders and background"""
-        # Draw border
-        pygame.draw.rect(screen, PRIMARY_COLOR, 
-                        (self.container_x, self.container_y, self.container_width, self.container_height), 
-                        2, 12)
-        
-        # Draw game area background (black)
-        pygame.draw.rect(screen, (0, 0, 0), 
-                        (self.game_area_x, self.game_area_y, self.game_area_width, self.game_area_height), 
-                        0)
-        
-        # Draw top UI background
-        ui_height = 80
-        pygame.draw.rect(screen, (18, 18, 18), 
-                        (self.container_x + 2, self.container_y + 2, self.container_width - 4, ui_height), 
-                        0, 12)
+        # Draw the game container
+        container_rect = pygame.Rect(60, 50, WIDTH - 120, HEIGHT - 100)
+        pygame.draw.rect(screen, (30, 30, 30), container_rect)  # Dark background
+        pygame.draw.rect(screen, PRIMARY_COLOR, container_rect, 2)  # Border
     
     def draw_lives(self, screen, lives):
         """Draw the player's remaining lives"""

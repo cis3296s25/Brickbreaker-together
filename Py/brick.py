@@ -28,3 +28,4 @@ class Brick:
                         self.rect.bottomleft, self.rect.bottomright, 2)
         pygame.draw.line(screen, self.dark_color, 
                         self.rect.topright, self.rect.bottomright, 2)
+
