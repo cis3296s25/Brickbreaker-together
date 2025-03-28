@@ -1,11 +1,13 @@
 import pygame
 import sys
 import random
+import os
 from game import Game
 
 # Initialize Pygame
 pygame.init()
 pygame.font.init()
+pygame.mixer.init()  # Initialize the mixer module
 
 # Screen Dimensions
 SCREEN_WIDTH = 1200
@@ -49,16 +51,24 @@ class FloatingBrick:
         screen.blit(rotated_surf, (self.x, self.y))
 
 class BrickBreakerMenu:
-    def __init__(self):
-        # get the screen size
-        info = pygame.display.Info()
-        self.screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
+    def __init__(self, screen):
+        self.screen = screen  # Store the screen object
+
         pygame.display.set_caption("BrickBreaker Together")
+        
+        # Load and play menu music
+        try:
+            music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+            pygame.mixer.music.load(music_path)
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(-1)
+        except Exception as e:
+            print(f"Could not load menu music: {e}")
         
         # update screen size
         global SCREEN_WIDTH, SCREEN_HEIGHT
-        SCREEN_WIDTH = info.current_w
-        SCREEN_HEIGHT = info.current_h
+        SCREEN_WIDTH = screen.get_width()
+        SCREEN_HEIGHT = screen.get_height()
         
         # Fonts
         self.title_font = pygame.font.SysFont('Segoe UI', 80, bold=True)
@@ -211,9 +221,18 @@ class BrickBreakerMenu:
                         
                         if menu_rect.collidepoint(mouse_pos):
                             if item == "Single Player":
+                                # Stop menu music before starting game
+                                pygame.mixer.music.stop()
                                 game = Game(self.screen)
                                 game.run()
-                                running = False
+                                # Restart menu music when returning from game
+                                try:
+                                    music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+                                    pygame.mixer.music.load(music_path)
+                                    pygame.mixer.music.set_volume(0.5)
+                                    pygame.mixer.music.play(-1)
+                                except Exception as e:
+                                    print(f"Could not reload menu music: {e}")
                             elif item == "Quit":
                                 running = False
 
@@ -227,4 +246,3 @@ class BrickBreakerMenu:
 
         pygame.quit()
         sys.exit()
-
