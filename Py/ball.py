@@ -19,18 +19,26 @@ class Ball:
 
     def reset(self, paddle):
         """
-        Reset the ball position and shoot it at a random angle.
-        Args
-            paddle (Paddle): The paddle object to position the ball correctly.
+        Reset the ball position and shoot it nearly vertically upward.
         """
-        # Center the ball on the paddle.
         self.rect.centerx = paddle.rect.centerx
         self.rect.bottom = paddle.rect.top
-        # Generate a random angle between -45° and +45° for launching the ball.
-        angle = random.uniform(-math.pi / 4, math.pi / 4)  # -45° to 45°
-        # Set the ball's speed based on the calculated angle.
-        self.dx = BALL_SPEED * math.cos(angle)
-        self.dy = -abs(BALL_SPEED * math.sin(angle))
+
+        MIN_VERTICAL_SPEED = 2  # Prevent near-horizontal bouncing
+        MIN_HORIZONTAL_SPEED = 1.5  # Enforce minimum horizontal drifting
+
+        while True:
+            # Favor near-vertical shots (around 90° or π/2)
+            angle = random.uniform(math.pi / 2 - 0.35, math.pi / 2 + 0.35)  # ~70° to 110°
+            dx = BALL_SPEED * math.cos(angle)
+            dy = -abs(BALL_SPEED * math.sin(angle))  # Always go upward
+
+            if abs(dy) >= MIN_VERTICAL_SPEED and abs(dx) >= MIN_HORIZONTAL_SPEED:
+                break
+
+        self.dx = dx
+        self.dy = dy
+
 
     def move(self, paddle, bricks):
         """
@@ -58,14 +66,35 @@ class Ball:
 
         # Bounce off paddle
         if self.rect.colliderect(paddle.rect):
-            self.dy = -self.dy
+            # Calculate hit position relative to paddle center
+            hit_pos = (self.rect.centerx - paddle.rect.centerx) / (PADDLE_WIDTH // 2)
+            angle = hit_pos * (math.pi / 3)  # Max angle deviation = 60 degrees
+
+            # Recalculate direction based on where it hit the paddle
+            speed = math.hypot(self.dx, self.dy)  # Keep the total speed constant
+            self.dx = speed * math.sin(angle)
+            self.dy = -abs(speed * math.cos(angle))  # Always bounce upward
+
 
         # Bounce off bricks
         for brick in bricks[:]:
-            if self.rect.colliderect(brick.rect):
-                bricks.remove(brick)
-                self.dy = -self.dy
-                return 10  # Score increase
+            if self.rect.colliderect(brick.rect): # Check if the brick is colliding
+                if self.rect.right >= brick.rect.left and self.rect.left < brick.rect.left:  # Ball hits right side of the brick
+                    bricks.remove(brick)
+                    self.dx = -self.dx + random.uniform(.1, 1)  # Reverse horizontal direction + speed up
+                    return 10  # Score increase
+                elif self.rect.left <= brick.rect.right and self.rect.right > brick.rect.right:  # Ball hits left side of the brick
+                    bricks.remove(brick)
+                    self.dx = -self.dx + random.uniform(.1, 1) # Reverse horizontal direction + speed up
+                    return 10  # Score increase
+                if self.rect.bottom >= brick.rect.top and self.rect.top < brick.rect.top:  # Ball hits the bottom of the brick
+                    bricks.remove(brick)
+                    self.dy = -self.dy + random.uniform(.1, 1) # Reverse vertical direction + speed up
+                    return 10  # Score increase
+                elif self.rect.top <= brick.rect.bottom and self.rect.bottom > brick.rect.bottom:  # Ball hits the top of the brick
+                    bricks.remove(brick)
+                    self.dy = -self.dy + random.uniform(.1, 1) # Reverse vertical direction + speed up
+                    return 10  # Score increase
 
         # If ball falls below paddle
         if self.rect.top >= HEIGHT:
