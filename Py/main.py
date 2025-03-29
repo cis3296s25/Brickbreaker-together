@@ -5,9 +5,13 @@ from mainmenu import BrickBreakerMenu
 
 def main():
     pygame.init()
+    
     # Get the screen size
     info = pygame.display.Info()
-    screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
+    # THIS IS FOR BORDERLESS WINDOWED
+    screen = pygame.display.set_mode((1920, 1080), pygame.SCALED | pygame.FULLSCREEN)
+    # THIS IS FOR FULLSCREEN
+    #screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN)
     pygame.display.set_caption("BrickBreaker Together")
     
     menu = BrickBreakerMenu(screen)
