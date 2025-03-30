@@ -6,12 +6,14 @@ from paddle import Paddle
 from ball import Ball
 from brick import Brick
 from ui import UI
+from powerup import PowerUp
 
 class Game:
     def __init__(self, screen):
         self.screen = screen
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
+        self.powerups = []
         
         # Load game music
         try:
