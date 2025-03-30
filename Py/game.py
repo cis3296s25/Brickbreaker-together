@@ -14,6 +14,7 @@ class Game:
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
         self.powerups = []
+        self.bomb_ready = False
 
         # Load game music
         try:
