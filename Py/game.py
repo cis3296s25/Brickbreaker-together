@@ -13,6 +13,7 @@ class Game:
         self.screen = screen
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
+        self.balls = [self.ball] #Now supports multiple balls
         self.powerups = []
         self.bomb_ready = False
 
