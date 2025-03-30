@@ -102,7 +102,7 @@ class Game:
 
     def update(self):
         if self.isGameInProgress and not self.isPaused:
-            result = self.ball.move(self.paddle, self.bricks)
+            result = self.ball.move(self.paddle, self.bricks, self)
             if result == 10:
                 self.score += 10
                 if random.random() < 0.2:
