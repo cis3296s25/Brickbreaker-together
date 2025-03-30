@@ -14,7 +14,7 @@ class Game:
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
         self.powerups = []
-        
+
         # Load game music
         try:
             self.game_music_path = os.path.join('Py', 'audio', 'game_music.mp3')
@@ -105,12 +105,24 @@ class Game:
             result = self.ball.move(self.paddle, self.bricks)
             if result == 10:
                 self.score += 10
+                if random.random() < 0.2:
+                    self.powerups.append(PowerUp(self.ball.rect.centerx, self.ball.rect.centery))
             elif result == -1:
                 self.lives -= 1
                 if self.lives <= 0:
                     self.game_over()
                 else:
                     self.ball.reset(self.paddle)
+
+            # Update powerups
+            for powerup in self.powerups[:]:
+                powerup.update()
+                if powerup.rect.colliderect(self.paddle.rect):
+                    powerup.apply(self)
+                    self.powerups.remove(powerup)
+                elif powerup.rect.top > HEIGHT:
+                    self.powerups.remove(powerup)
+
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -123,7 +135,9 @@ class Game:
         self.ball.draw(self.screen)
         for brick in self.bricks:
             brick.draw(self.screen)
-        
+        # Draw powerups
+        for powerup in self.powerups:
+            powerup.draw(self.screen)
         # make sure the pause menu is on top
         if self.isPaused:
             self.ui.pause_menu.draw(self.screen)
@@ -165,6 +179,9 @@ class Game:
         self.score = 0
         self.ball.reset(self.paddle)
         self.create_bricks()
+        self.powerups.clear()
+        self.bomb_ready = False
+        self.slow_until = 0
 
     def run(self):
         clock = pygame.time.Clock()
