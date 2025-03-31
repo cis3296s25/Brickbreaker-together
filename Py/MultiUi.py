@@ -206,7 +206,7 @@ class UIElement:
         pygame.draw.circle(screen, PLAYER2_COLOR, self.ball2_pos, BALL_RADIUS)
         pygame.draw.circle(screen, PLAYER2_COLOR, self.ball2_pos, BALL_RADIUS + 4, width=2)
         
-        # 绘制砖块
+        # Draw brick
         for brick in self.bricks:
             brick.draw(screen)
         
