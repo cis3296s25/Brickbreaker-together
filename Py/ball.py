@@ -40,7 +40,7 @@ class Ball:
         self.dy = dy
 
 
-    def move(self, paddle, bricks):
+    def move(self, paddle, bricks, game, speed_modifier=1.0):
         """
         Move the ball and handle collisions with walls, paddle, and bricks.
         Args
@@ -53,8 +53,8 @@ class Ball:
                 0 If nothing special happens
         """
         # Update the ball's position based on its velocity.
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+        self.rect.x += self.dx * speed_modifier #consider the speed modifier
+        self.rect.y += self.dy * speed_modifier #consider the speed modifier
 
         # Bounce off left and right walls
         if self.rect.left <= 80 or self.rect.right >= WIDTH - 80:
@@ -75,10 +75,21 @@ class Ball:
             self.dx = speed * math.sin(angle)
             self.dy = -abs(speed * math.cos(angle))  # Always bounce upward
 
-
+    
         # Bounce off bricks
         for brick in bricks[:]:
             if self.rect.colliderect(brick.rect): # Check if the brick is colliding
+                if game.bomb_ready:
+                # Trigger explosion (destroy surrounding bricks)
+                    explosion_radius = 1  # 3x3 grid
+                    bx, by = brick.rect.center
+
+                    for b in bricks[:]:
+                        if abs(b.rect.centerx - bx) <= BRICK_WIDTH + 10 and abs(b.rect.centery - by) <= BRICK_HEIGHT + 10:
+                            bricks.remove(b)
+
+                    game.bomb_ready = False  # Clear bomb after use
+                    return 10  # Score increase
                 if self.rect.right >= brick.rect.left and self.rect.left < brick.rect.left:  # Ball hits right side of the brick
                     bricks.remove(brick)
                     if(self.rect.top <= brick.rect.bottom and self.rect.bottom > brick.rect.bottom):
