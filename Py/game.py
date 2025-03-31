@@ -16,7 +16,8 @@ class Game:
         self.balls = [self.ball] #Now supports multiple balls
         self.powerups = []
         self.bomb_ready = False
-
+        self.speed_modifier = 1.0  # Normal speed initially
+        self.slow_until = 0
         # Load game music
         try:
             self.game_music_path = os.path.join('Py', 'audio', 'game_music.mp3')
@@ -106,7 +107,7 @@ class Game:
     def update(self):
         if self.isGameInProgress and not self.isPaused:
             for ball in self.balls[:]:
-                result = ball.move(self.paddle, self.bricks, self)
+                result = ball.move(self.paddle, self.bricks, self, self.speed_modifier)
 
                 if result == 10:
                     self.score += 10
@@ -131,6 +132,10 @@ class Game:
                 self.powerups.remove(powerup)
             elif powerup.rect.top > HEIGHT:
                 self.powerups.remove(powerup)
+                
+        # Reset speed modifier after slow effect ends
+        if self.speed_modifier < 1.0 and pygame.time.get_ticks() > self.slow_until:
+            self.speed_modifier = 1.0
 
 
     def draw(self):

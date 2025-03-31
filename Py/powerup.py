@@ -55,4 +55,5 @@ class PowerUp:
             game.lives = min(game.lives + 1, 5)
 
         elif self.type == 'slow_ball':
-            game.slow_until = pygame.time.get_ticks() + 3000  # Slow for 3 seconds
+            game.speed_modifier = 0.8  # Reduce ball speed to 80%
+            game.slow_until = pygame.time.get_ticks() + 3000  # for 3 seconds

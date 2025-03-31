@@ -40,7 +40,7 @@ class Ball:
         self.dy = dy
 
 
-    def move(self, paddle, bricks, game):
+    def move(self, paddle, bricks, game, speed_modifier=1.0):
         """
         Move the ball and handle collisions with walls, paddle, and bricks.
         Args
@@ -53,8 +53,8 @@ class Ball:
                 0 If nothing special happens
         """
         # Update the ball's position based on its velocity.
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+        self.rect.x += self.dx * speed_modifier #consider the speed modifier
+        self.rect.y += self.dy * speed_modifier #consider the speed modifier
 
         # Bounce off left and right walls
         if self.rect.left <= 80 or self.rect.right >= WIDTH - 80:
