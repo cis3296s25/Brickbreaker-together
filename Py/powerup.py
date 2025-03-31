@@ -41,9 +41,15 @@ class PowerUp:
 
         elif self.type == 'multi_ball':
             from ball import Ball
-            for _ in range(2):
-                new_ball = Ball(game.paddle)
-                game.balls.append(new_ball)
+            new_balls = []
+            for b in game.balls:
+                for _ in range(2):
+                    new_ball = Ball(game.paddle)
+                    new_ball.rect.center = b.rect.center  # Start from existing ball
+                    new_ball.dx = b.dx + random.uniform(-1, 1)
+                    new_ball.dy = b.dy + random.uniform(-1, 1)
+                    new_balls.append(new_ball)
+            game.balls.extend(new_balls)
 
         elif self.type == 'extra_life':
             game.lives = min(game.lives + 1, 5)
