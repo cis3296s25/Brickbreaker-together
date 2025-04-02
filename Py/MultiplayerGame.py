@@ -66,7 +66,7 @@ class Paddle:
         pygame.draw.rect(screen, self.color, self.rect.inflate(4, 4), border_radius=12, width=2)
 
 class Ball:
-    def __init__(self, x, y, color, vx, vy):
+    def __init__(self, x, y, color, vx, vy, game):
         self.x = x
         self.y = y
         self.vx = vx
@@ -74,11 +74,12 @@ class Ball:
         self.radius = BALL_RADIUS
         self.color = color
         self.active = True
+        self.game = game  # <-- store reference to game instance
 
-    def move(self):
+    def move(self, speed_modifier=1.0):
         if self.active:
-            self.x += self.vx
-            self.y += self.vy
+            self.x += self.vx * speed_modifier
+            self.y += self.vy * speed_modifier
 
     @property
     def rect(self):
@@ -109,8 +110,12 @@ class Ball:
             if brick['active'] and self.rect.colliderect(brick['rect']):
                 brick['active'] = False
                 self.vy *= -1
+                
+                # Chance to drop a power-up
+                if random.random() < 0.2:  # 20% chance
+                    self.game.powerups.append(PowerUp(brick['rect'].centerx, brick['rect'].centery))
+                
                 return "brick"
-        return None
 
 class Game:
     def __init__(self):
@@ -129,6 +134,9 @@ class Game:
         self.slow_until_p1 = 0
         self.slow_until_p2 = 0
         
+        self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1,1])*BALL_SPEED/2, BALL_SPEED, self)
+        self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1,1])*BALL_SPEED/2, -BALL_SPEED, self)
+
 
         self.countdown = 3
         self.countdown_timer = pygame.time.get_ticks()
