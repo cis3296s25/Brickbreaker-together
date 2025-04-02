@@ -124,6 +124,10 @@ class Game:
         self.lives1 = LIVES
         self.lives2 = LIVES
         self.winner = None
+        self.speed_modifier_p1 = 1.0
+        self.speed_modifier_p2 = 1.0
+        self.slow_until_p1 = 0
+        self.slow_until_p2 = 0
         
 
         self.countdown = 3
