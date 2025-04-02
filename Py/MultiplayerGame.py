@@ -110,12 +110,51 @@ class Ball:
             if brick['active'] and self.rect.colliderect(brick['rect']):
                 brick['active'] = False
                 self.vy *= -1
-                
-                # Chance to drop a power-up
-                if random.random() < 0.2:  # 20% chance
+
+                if random.random() < 0.2:  # 20% chance to drop power-up
                     self.game.powerups.append(PowerUp(brick['rect'].centerx, brick['rect'].centery))
-                
+
                 return "brick"
+            
+class PowerUp:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x - 15, y - 15, 30, 30)
+        self.type = random.choice(['slow_ball', 'extra_life'])
+        self.speed = 3
+
+        self.color_map = {
+            'slow_ball': (241, 196, 15),  # Yellow
+            'extra_life': (46, 204, 113), # Green
+        }
+
+        self.label_map = {
+            'slow_ball': 'S',
+            'extra_life': '+',
+        }
+
+    def update(self):
+        self.rect.y += self.speed
+
+    def draw(self, surface):
+        pygame.draw.ellipse(surface, self.color_map[self.type], self.rect)
+        font = pygame.font.Font(None, 24)
+        text = font.render(self.label_map[self.type], True, (0, 0, 0))
+        text_rect = text.get_rect(center=self.rect.center)
+        surface.blit(text, text_rect)
+
+    def apply(self, game, player):
+        if self.type == 'slow_ball':
+            if player == 1:
+                game.speed_modifier_p1 = 0.8
+                game.slow_until_p1 = pygame.time.get_ticks() + 3000
+            elif player == 2:
+                game.speed_modifier_p2 = 0.8
+                game.slow_until_p2 = pygame.time.get_ticks() + 3000
+        elif self.type == 'extra_life':
+            if player == 1:
+                game.lives1 = min(game.lives1 + 1, LIVES)
+            elif player == 2:
+                game.lives2 = min(game.lives2 + 1, LIVES)
 
 class Game:
     def __init__(self):
@@ -133,7 +172,7 @@ class Game:
         self.speed_modifier_p2 = 1.0
         self.slow_until_p1 = 0
         self.slow_until_p2 = 0
-        
+        self.powerups = []
         self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1,1])*BALL_SPEED/2, BALL_SPEED, self)
         self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1,1])*BALL_SPEED/2, -BALL_SPEED, self)
 
@@ -194,6 +233,18 @@ class Game:
         self.ball1.move()
         self.ball2.move()
 
+        # Update power-ups
+        for powerup in self.powerups[:]:
+            powerup.update()
+
+            if powerup.rect.colliderect(self.player1.rect):
+                powerup.apply(self, player=1)
+                self.powerups.remove(powerup)
+            elif powerup.rect.colliderect(self.player2.rect):
+                powerup.apply(self, player=2)
+                self.powerups.remove(powerup)
+            elif powerup.rect.top > self.bounds.bottom:
+                self.powerups.remove(powerup)
         if self.ball1.active:
             result = self.ball1.check_collision(self.bounds, self.player1, self.player2, self.bricks, True)
             if result == "hit_top":
