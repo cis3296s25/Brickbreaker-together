@@ -8,6 +8,7 @@ UI_BACKGROUND = (18, 18, 18, 215)
 TEXT_COLOR = (255, 255, 255)
 ACCENT_COLOR = (231, 76, 60)
 PINK = (255, 105, 180)
+TEAL = (0, 128, 128)
 
 
 class FloatingBrick:

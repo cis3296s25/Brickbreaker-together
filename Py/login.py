@@ -3,7 +3,7 @@ import sys
 import hashlib
 from ui_constants import (
     PRIMARY_COLOR, SECONDARY_COLOR, BACKGROUND_COLOR,
-    UI_BACKGROUND, TEXT_COLOR, ACCENT_COLOR, PINK,
+    TEXT_COLOR, ACCENT_COLOR,
     FloatingBrick
 )
 from db import get_user_by_username
@@ -36,7 +36,8 @@ class LoginScreen:
         self.hover_alpha_direction_signup = 1
         self.error_message = ""
         self.clock = pygame.time.Clock()
-        self.focus_list = ["username", "password", "login_button"]  # cycle order
+        self.focus_list = ["username", "password", "login_button"]
+        self.login_success_username = None
 
     def run(self):
         running = True
@@ -63,6 +64,9 @@ class LoginScreen:
             self.draw()
             pygame.display.flip()
 
+            if self.login_success_username:
+                return self.login_success_username
+
         pygame.quit()
         sys.exit()
 
@@ -73,9 +77,9 @@ class LoginScreen:
 
     def try_submit(self):
         if self.username_text.strip() and self.password_text.strip():
-            result = self.attempt_login()
-            if result == "SUCCESS":
-                return
+            status, user_name = self.attempt_login()
+            if status == "SUCCESS":
+                self.login_success_username = user_name
 
     def handle_key_input(self, event):
         if self.active_input == "username":
@@ -97,9 +101,9 @@ class LoginScreen:
         else:
             self.active_input = None
         if self.login_button_rect.collidepoint(pos):
-            result = self.attempt_login()
-            if result == "SUCCESS":
-                return
+            status, user_name = self.attempt_login()
+            if status == "SUCCESS":
+                self.login_success_username = user_name
         if self.goto_signup_rect.collidepoint(pos):
             from signup import SignUpScreen
             signup = SignUpScreen(self.screen)
@@ -114,18 +118,20 @@ class LoginScreen:
         username = self.username_text.strip()
         password = self.password_text.strip()
         if not username or not password:
-            return "Please enter username and password."
+            return ("ERROR", None)
         user = get_user_by_username(username)
         if not user:
-            return "Username not found."
+            self.error_message = "Username not found."
+            return ("ERROR", None)
         hashed_input = hashlib.sha256(password.encode()).hexdigest()
         if hashed_input != user['password_hash']:
-            return "Incorrect password."
+            self.error_message = "Incorrect password."
+            return ("ERROR", None)
         self.error_message = "Login successful!"
         self.draw()
         pygame.display.flip()
         pygame.time.wait(1000)
-        return "SUCCESS"
+        return ("SUCCESS", username)
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -180,7 +186,7 @@ class LoginScreen:
                     self.hover_alpha_signup = 0
 
     def draw_button(self, rect, text, hovered=False, is_login=True):
-        alpha_val = 0
+        alpha_val = 50
         if is_login:
             alpha_val = 50 + self.hover_alpha_login if hovered else 50
         else:

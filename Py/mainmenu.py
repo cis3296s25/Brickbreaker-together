@@ -1,13 +1,12 @@
 import pygame
 import sys
-import random
 import os
 from game import Game
 
 # Import colors and FloatingBrick from ui_constants.py
 from ui_constants import (
     PRIMARY_COLOR, SECONDARY_COLOR, BACKGROUND_COLOR,
-    UI_BACKGROUND, TEXT_COLOR, ACCENT_COLOR, PINK, 
+    UI_BACKGROUND, TEXT_COLOR, ACCENT_COLOR, PINK, TEAL,
     FloatingBrick
 )
 
@@ -35,7 +34,6 @@ class BrickBreakerMenu:
         except Exception as e:
             print(f"Could not load menu music: {e}")
         
-        # update screen size
         global SCREEN_WIDTH, SCREEN_HEIGHT
         SCREEN_WIDTH = screen.get_width()
         SCREEN_HEIGHT = screen.get_height()
@@ -47,6 +45,7 @@ class BrickBreakerMenu:
         
         # Menu items
         self.menu_items = [
+            "Login/Sign Up",
             "Single Player",
             "Multiple Player", 
             "Settings", 
@@ -55,10 +54,11 @@ class BrickBreakerMenu:
         
         # Colors for menu item borders
         self.menu_colors = [
-            PRIMARY_COLOR, 
-            SECONDARY_COLOR, 
-            (243, 156, 18),  # Orange
-            ACCENT_COLOR
+            PINK,                 # For Login/Sign Up
+            PRIMARY_COLOR,        # Single Player
+            SECONDARY_COLOR,      # Multiple Player
+            (243, 156, 18),       # Settings (Orange)
+            ACCENT_COLOR          # Quit
         ]
         
         # Floating bricks
@@ -71,26 +71,16 @@ class BrickBreakerMenu:
         self.hover_alpha = 0
         self.hover_alpha_direction = 1
 
-        # Login/Sign Up button
-        self.login_button_rect = pygame.Rect(SCREEN_WIDTH - 220, 20, 200, 50)
-        self.login_button_text = self.menu_font.render("Login/Sign Up", True, TEXT_COLOR)
-        
-        # Track hover state for login button
-        self.hovered_login_button = False
-        # Use a separate alpha animation for the login button
-        self.hover_alpha_login = 0
-        self.hover_alpha_direction_login = 1
+        # Track currently logged-in user
+        self.current_user = None
 
     def draw_background(self):
         self.screen.fill(BACKGROUND_COLOR)
-        
-        # Draw floating bricks
         for brick in self.floating_bricks:
             brick.update()
             brick.draw(self.screen)
 
     def draw_title(self):
-        # Gradient text effect
         text_surface = self.title_font.render('BRICKBREAKER', True, PRIMARY_COLOR)
         tagline_surface = self.tagline_font.render('TOGETHER', True, TEXT_COLOR)
         
@@ -101,11 +91,18 @@ class BrickBreakerMenu:
         self.screen.blit(tagline_surface, tagline_rect)
 
     def draw_menu(self):
+        # If a user is logged in, replace the first item text with the username
+        if self.current_user:
+            self.menu_items[0] = self.current_user.capitalize()
+            self.menu_colors[0] = TEAL
+        else:
+            self.menu_items[0] = "Login/Sign Up"
+            self.menu_colors[0] = PINK
+
         menu_width = 500
         menu_start_y = 250
         menu_item_height = 70
         
-        # Update hover animation for main menu items
         self.hover_alpha += 5 * self.hover_alpha_direction
         if self.hover_alpha >= 100:
             self.hover_alpha_direction = -1
@@ -113,7 +110,6 @@ class BrickBreakerMenu:
             self.hover_alpha_direction = 1
         
         for i, item in enumerate(self.menu_items):
-            # Menu item background
             menu_rect = pygame.Rect(
                 (SCREEN_WIDTH - menu_width) // 2, 
                 menu_start_y + i * (menu_item_height + 20), 
@@ -130,10 +126,9 @@ class BrickBreakerMenu:
                 s.fill(UI_BACKGROUND)
             self.screen.blit(s, menu_rect)
             
-            # Border with glow effect for hovered item
+            # Border with glow effect if hovered
             border_color = self.menu_colors[i]
             if i == self.hovered_item:
-                # Draw multiple lines for glow effect
                 for offset in range(4):
                     pygame.draw.line(
                         self.screen,
@@ -157,62 +152,13 @@ class BrickBreakerMenu:
             text_rect = text_surface.get_rect(midleft=(menu_rect.left + 20, menu_rect.centery))
             self.screen.blit(text_surface, text_rect)
 
-    def draw_login_button(self):
-        
-        # First, update the hover animation for the login button
-        if self.hovered_login_button:
-            self.hover_alpha_login += 5 * self.hover_alpha_direction_login
-            if self.hover_alpha_login >= 100:
-                self.hover_alpha_direction_login = -1
-            elif self.hover_alpha_login <= 0:
-                self.hover_alpha_direction_login = 1
-        else:
-            # Fade out if not hovered (drive alpha back to 0)
-            if self.hover_alpha_login > 0:
-                self.hover_alpha_login -= 5
-                if self.hover_alpha_login < 0:
-                    self.hover_alpha_login = 0
-        
-        # Create a surface for the button background
-        s = pygame.Surface((self.login_button_rect.width, self.login_button_rect.height), pygame.SRCALPHA)
-        if self.hovered_login_button:
-            hover_color = (*PINK[:3], 50 + self.hover_alpha_login)
-            s.fill(hover_color)
-        else:
-            s.fill(UI_BACKGROUND)
-        
-        # Blit the background surface onto the main screen
-        self.screen.blit(s, (self.login_button_rect.x, self.login_button_rect.y))
-
-        # Draw border glow if hovered
-        if self.hovered_login_button:
-            for offset in range(4):
-                pygame.draw.line(
-                    self.screen,
-                    (*PINK[:3], 100 - offset * 25),
-                    (self.login_button_rect.left - offset, self.login_button_rect.top),
-                    (self.login_button_rect.left - offset, self.login_button_rect.bottom),
-                    2
-                )
-        else:
-            # Solid border if not hovered
-            pygame.draw.line(
-                self.screen,
-                PINK,
-                (self.login_button_rect.left, self.login_button_rect.top),
-                (self.login_button_rect.left, self.login_button_rect.bottom),
-                4
-            )
-        
-        # Draw the text on top
-        login_text_rect = self.login_button_text.get_rect(center=self.login_button_rect.center)
-        self.screen.blit(self.login_button_text, login_text_rect)
-
     def open_login_signup(self):
         print("Transition to Login/Sign Up screen")
         from login import LoginScreen
         login_screen = LoginScreen(self.screen)
-        login_screen.run()
+        username = login_screen.run()
+        if username:
+            self.current_user = username
 
     def run(self):
         running = True
@@ -222,12 +168,9 @@ class BrickBreakerMenu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                
-                # esc to quit
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-
                 if event.type == pygame.MOUSEMOTION:
                     menu_width = 500
                     menu_start_y = 250
@@ -244,16 +187,10 @@ class BrickBreakerMenu:
                         if menu_rect.collidepoint(mouse_pos):
                             self.hovered_item = i
                             break
-
-                    # Check hover for login button
-                    self.hovered_login_button = self.login_button_rect.collidepoint(mouse_pos)
-                
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    # Check if a menu item was clicked
                     menu_width = 500
                     menu_start_y = 250
                     menu_item_height = 70
-                    
                     for i, item in enumerate(self.menu_items):
                         menu_rect = pygame.Rect(
                             (SCREEN_WIDTH - menu_width) // 2,
@@ -262,12 +199,15 @@ class BrickBreakerMenu:
                             menu_item_height
                         )
                         if menu_rect.collidepoint(mouse_pos):
-                            if item == "Single Player":
-                                # Stop menu music before starting game
+                            if i == 0:
+                                if self.current_user:
+                                    print(f"Clicked user button for {self.current_user.capitalize()}")
+                                else:
+                                    self.open_login_signup()
+                            elif item == "Single Player":
                                 pygame.mixer.music.stop()
                                 game = Game(self.screen)
                                 game.run()
-                                # Restart menu music when returning from game
                                 try:
                                     music_path = os.path.join('Py', 'audio', 'background_music.mp3')
                                     pygame.mixer.music.load(music_path)
@@ -277,16 +217,10 @@ class BrickBreakerMenu:
                                     print(f"Could not reload menu music: {e}")
                             elif item == "Quit":
                                 running = False
-                    
-                    # Check if the Login/Sign Up button was clicked
-                    if self.login_button_rect.collidepoint(mouse_pos):
-                        self.open_login_signup()
 
-            # Draw everything
             self.draw_background()
             self.draw_title()
             self.draw_menu()
-            self.draw_login_button()
 
             pygame.display.flip()
             self.clock.tick(60)
