@@ -214,24 +214,26 @@ class Game:
 
     def update(self):
         current_time = pygame.time.get_ticks()
+
         if not self.game_started:
             if current_time - self.countdown_timer >= self.countdown_interval:
                 self.countdown -= 1
                 self.countdown_timer = current_time
-                self.animation_scale = 0.1  # reset scale
-                
+                self.animation_scale = 0.1
+
                 if self.countdown <= 0:
                     self.game_started = True
-            
-            # update animation scale
+
             if self.animation_scale < 1.0:
                 self.animation_scale += self.animation_speed
-            return 
-        
-        if self.winner: return
+            return
 
-        self.ball1.move()
-        self.ball2.move()
+        if self.winner:
+            return
+
+        # Move balls with speed modifiers
+        self.ball1.move(self.speed_modifier_p1)
+        self.ball2.move(self.speed_modifier_p2)
 
         # Update power-ups
         for powerup in self.powerups[:]:
@@ -245,6 +247,15 @@ class Game:
                 self.powerups.remove(powerup)
             elif powerup.rect.top > self.bounds.bottom:
                 self.powerups.remove(powerup)
+
+        # Reset speed modifiers after duration
+        if self.speed_modifier_p1 < 1.0 and current_time > self.slow_until_p1:
+            self.speed_modifier_p1 = 1.0
+
+        if self.speed_modifier_p2 < 1.0 and current_time > self.slow_until_p2:
+            self.speed_modifier_p2 = 1.0
+
+        # Ball 1 collision logic
         if self.ball1.active:
             result = self.ball1.check_collision(self.bounds, self.player1, self.player2, self.bricks, True)
             if result == "hit_top":
@@ -256,6 +267,7 @@ class Game:
             elif result == "brick":
                 self.player1.score += 10
 
+        # Ball 2 collision logic
         if self.ball2.active:
             result = self.ball2.check_collision(self.bounds, self.player1, self.player2, self.bricks, False)
             if result == "hit_bottom":
@@ -267,11 +279,14 @@ class Game:
             elif result == "brick":
                 self.player2.score += 10
 
+        # Respawn balls if inactive and lives remain
         if not self.ball1.active and self.lives1 > 0:
-            self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1,1])*BALL_SPEED/2, BALL_SPEED)
-        if not self.ball2.active and self.lives2 > 0:
-            self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1,1])*BALL_SPEED/2, -BALL_SPEED)
+            self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, BALL_SPEED, self)
 
+        if not self.ball2.active and self.lives2 > 0:
+            self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
+
+        # Determine the winner
         if self.lives1 <= 0 and self.lives2 <= 0:
             self.winner = "DRAW"
         elif self.lives1 <= 0:
@@ -316,6 +331,9 @@ class Game:
         if self.ball1.active: self.ball1.draw()
         if self.ball2.active: self.ball2.draw()
 
+        for powerup in self.powerups:
+            powerup.draw(screen)
+            
         for brick in self.bricks:
             if brick['active']:
                 pygame.draw.rect(screen, brick['color'], brick['rect'], border_radius=4)
