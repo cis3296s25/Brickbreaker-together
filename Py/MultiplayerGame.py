@@ -287,12 +287,29 @@ class Game:
             self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
 
         # Determine the winner
+        # Respawn balls only if inactive and player still has lives
+        if not self.ball1.active and self.lives1 > 0:
+            self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, BALL_SPEED, self)
+
+        if not self.ball2.active and self.lives2 > 0:
+            self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
+
+        # Once a player's lives reach zero, stop spawning their ball
+        if self.lives1 <= 0:
+            self.ball1.active = False
+
+        if self.lives2 <= 0:
+            self.ball2.active = False
+
+        # Determine winner only when both players lost all lives
         if self.lives1 <= 0 and self.lives2 <= 0:
-            self.winner = "DRAW"
-        elif self.lives1 <= 0:
-            self.winner = "PLAYER 2 WINS"
-        elif self.lives2 <= 0:
-            self.winner = "PLAYER 1 WINS"
+            if self.player1.score > self.player2.score:
+                self.winner = "PLAYER 1 WINS"
+            elif self.player2.score > self.player1.score:
+                self.winner = "PLAYER 2 WINS"
+            else:
+                self.winner = "DRAW"
+
 
     def draw_ui(self):
         # UI panels
