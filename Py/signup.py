@@ -17,23 +17,19 @@ class SignUpScreen:
         self.screen = screen
         self.screen_width = screen.get_width()
         self.screen_height = screen.get_height()
-
         self.title_font = pygame.font.SysFont('Segoe UI', 60, bold=True)
         self.input_font = pygame.font.SysFont('Segoe UI', 32)
         self.button_font = pygame.font.SysFont('Segoe UI', 28)
-
         self.floating_bricks = [FloatingBrick(self.screen_width, self.screen_height) for _ in range(5)]
 
         self.username_text = ""
         self.password_text = ""
         self.confirm_text = ""
-
         self.active_input = "username"
 
         self.username_box = pygame.Rect(self.screen_width//2 - 200, 220, 400, 50)
         self.password_box = pygame.Rect(self.screen_width//2 - 200, 290, 400, 50)
         self.confirm_box = pygame.Rect(self.screen_width//2 - 200, 360, 400, 50)
-        
         self.signup_button_rect = pygame.Rect(self.screen_width//2 - 80, 430, 160, 50)
         self.goto_login_rect = pygame.Rect(self.screen_width//2 - 80, 490, 160, 40)
 
@@ -43,10 +39,10 @@ class SignUpScreen:
         self.hover_alpha_direction_signup = 1
         self.hover_alpha_login = 0
         self.hover_alpha_direction_login = 1
-
         self.error_message = ""
         self.clock = pygame.time.Clock()
 
+        self.result_status = None
         self.focus_list = ["username", "password", "confirm", "signup_button"]
 
     def run(self):
@@ -72,6 +68,9 @@ class SignUpScreen:
                 elif event.type == pygame.MOUSEMOTION:
                     self.handle_mouse_motion(mouse_pos)
 
+            if self.result_status in ("ACCOUNT_CREATED", "OPEN_LOGIN"):
+                return self.result_status
+
             self.draw()
             pygame.display.flip()
 
@@ -85,9 +84,7 @@ class SignUpScreen:
 
     def try_submit(self):
         if self.username_text.strip() and self.password_text.strip() and self.confirm_text.strip():
-            result = self.attempt_signup()
-            if result == "SUCCESS":
-                return
+            self.attempt_signup()
 
     def handle_key_input(self, event):
         if self.active_input == "username":
@@ -117,15 +114,10 @@ class SignUpScreen:
             self.active_input = None
 
         if self.signup_button_rect.collidepoint(pos):
-            result = self.attempt_signup()
-            if result == "SUCCESS":
-                return
+            self.attempt_signup()
 
         if self.goto_login_rect.collidepoint(pos):
-            from login import LoginScreen
-            login = LoginScreen(self.screen)
-            login.run()
-            return
+            self.result_status = "OPEN_LOGIN"
 
     def handle_mouse_motion(self, mouse_pos):
         self.hover_signup = self.signup_button_rect.collidepoint(mouse_pos)
@@ -138,27 +130,21 @@ class SignUpScreen:
 
         if not username or not password or not confirm:
             self.error_message = "Please fill all fields."
-            return ""
+            return
         if password != confirm:
             self.error_message = "Passwords do not match."
-            return ""
-
+            return
         existing = get_user_by_username(username)
         if existing:
             self.error_message = "Username already taken."
-            return ""
-        
+            return
         hashed_input = hashlib.sha256(password.encode()).hexdigest()
         create_user(username, password)
         self.error_message = "Account created!"
         self.draw()
         pygame.display.flip()
         pygame.time.wait(1000)
-
-        from login import LoginScreen
-        login = LoginScreen(self.screen)
-        login.run()
-        return "SUCCESS"
+        self.result_status = "ACCOUNT_CREATED"
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -203,29 +189,32 @@ class SignUpScreen:
                 if self.hover_alpha_signup >= 100:
                     self.hover_alpha_direction_signup = -1
                 elif self.hover_alpha_signup <= 0:
-                    self.hover_alpha_direction_signup = 1
-            else:
-                self.hover_alpha_signup -= 5
-                if self.hover_alpha_signup < 0:
                     self.hover_alpha_signup = 0
+            else:
+                if self.hover_alpha_signup > 0:
+                    self.hover_alpha_signup -= 5
+                    if self.hover_alpha_signup < 0:
+                        self.hover_alpha_signup = 0
         else:
             if self.hover_login:
                 self.hover_alpha_login += 5 * self.hover_alpha_direction_login
                 if self.hover_alpha_login >= 100:
                     self.hover_alpha_direction_login = -1
                 elif self.hover_alpha_login <= 0:
-                    self.hover_alpha_login = 1
-            else:
-                self.hover_alpha_login -= 5
-                if self.hover_alpha_login < 0:
                     self.hover_alpha_login = 0
+            else:
+                if self.hover_alpha_login > 0:
+                    self.hover_alpha_login -= 5
+                    if self.hover_alpha_login < 0:
+                        self.hover_alpha_login = 0
 
     def draw_button(self, rect, text, hovered=False, is_signup=True):
-        alpha_val = 0
-        if is_signup:
-            alpha_val = 50 + self.hover_alpha_signup if hovered else 50
-        else:
-            alpha_val = 50 + self.hover_alpha_login if hovered else 50
+        alpha_val = 50
+        if hovered:
+            if is_signup:
+                alpha_val = 50 + self.hover_alpha_signup
+            else:
+                alpha_val = 50 + self.hover_alpha_login
 
         s = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
         s.fill((*SECONDARY_COLOR[:3], alpha_val))
