@@ -1,8 +1,14 @@
 import pygame
 import sys
-import random
 import os
 from game import Game
+
+# Import colors and FloatingBrick from ui_constants.py
+from ui_constants import (
+    PRIMARY_COLOR, SECONDARY_COLOR, BACKGROUND_COLOR,
+    UI_BACKGROUND, TEXT_COLOR, ACCENT_COLOR, PINK, TEAL,
+    FloatingBrick
+)
 
 # Initialize Pygame
 pygame.init()
@@ -12,43 +18,6 @@ pygame.mixer.init()  # Initialize the mixer module
 # Screen Dimensions
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 700
-
-# Colors
-PRIMARY_COLOR = (52, 152, 219)
-SECONDARY_COLOR = (46, 204, 113)
-BACKGROUND_COLOR = (18, 18, 18)
-UI_BACKGROUND = (18, 18, 18, 215)
-TEXT_COLOR = (255, 255, 255)
-ACCENT_COLOR = (231, 76, 60)
-
-class FloatingBrick:
-    def __init__(self, screen_width, screen_height):
-        self.width = 60
-        self.height = 20
-        self.x = random.randint(0, screen_width - self.width)
-        self.y = screen_height
-        self.color = random.choice([
-            PRIMARY_COLOR, 
-            SECONDARY_COLOR, 
-            ACCENT_COLOR, 
-            (243, 156, 18)  # Orange color
-        ])
-        self.speed = random.uniform(0.5, 2)
-        self.rotation = 0
-        self.rotation_speed = random.uniform(-2, 2)
-
-    def update(self):
-        self.y -= self.speed
-        self.rotation += self.rotation_speed
-        if self.y < -self.height:
-            self.y = pygame.display.get_surface().get_height()
-            self.x = random.randint(0, pygame.display.get_surface().get_width() - self.width)
-
-    def draw(self, screen):
-        surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        surf.fill(self.color + (25,))  # Low opacity
-        rotated_surf = pygame.transform.rotate(surf, self.rotation)
-        screen.blit(rotated_surf, (self.x, self.y))
 
 class BrickBreakerMenu:
     def __init__(self, screen):
@@ -65,7 +34,6 @@ class BrickBreakerMenu:
         except Exception as e:
             print(f"Could not load menu music: {e}")
         
-        # update screen size
         global SCREEN_WIDTH, SCREEN_HEIGHT
         SCREEN_WIDTH = screen.get_width()
         SCREEN_HEIGHT = screen.get_height()
@@ -77,6 +45,7 @@ class BrickBreakerMenu:
         
         # Menu items
         self.menu_items = [
+            "Login/Sign Up",
             "Single Player",
             "Multiple Player", 
             "Settings", 
@@ -85,10 +54,11 @@ class BrickBreakerMenu:
         
         # Colors for menu item borders
         self.menu_colors = [
-            PRIMARY_COLOR, 
-            SECONDARY_COLOR, 
-            (243, 156, 18),  # Orange
-            ACCENT_COLOR
+            PINK,                 # For Login/Sign Up
+            PRIMARY_COLOR,        # Single Player
+            SECONDARY_COLOR,      # Multiple Player
+            (243, 156, 18),       # Settings (Orange)
+            ACCENT_COLOR          # Quit
         ]
         
         # Floating bricks
@@ -96,19 +66,21 @@ class BrickBreakerMenu:
         
         self.clock = pygame.time.Clock()
         self.hovered_item = None
+        
+        # For hover animation on menu items
         self.hover_alpha = 0
         self.hover_alpha_direction = 1
 
+        # Track currently logged-in user
+        self.current_user = None
+
     def draw_background(self):
         self.screen.fill(BACKGROUND_COLOR)
-        
-        # Draw floating bricks
         for brick in self.floating_bricks:
             brick.update()
             brick.draw(self.screen)
 
     def draw_title(self):
-        # Gradient text effect
         text_surface = self.title_font.render('BRICKBREAKER', True, PRIMARY_COLOR)
         tagline_surface = self.tagline_font.render('TOGETHER', True, TEXT_COLOR)
         
@@ -119,11 +91,18 @@ class BrickBreakerMenu:
         self.screen.blit(tagline_surface, tagline_rect)
 
     def draw_menu(self):
+        # If a user is logged in, replace the first item text with the username
+        if self.current_user:
+            self.menu_items[0] = self.current_user.capitalize()
+            self.menu_colors[0] = TEAL
+        else:
+            self.menu_items[0] = "Login/Sign Up"
+            self.menu_colors[0] = PINK
+
         menu_width = 500
         menu_start_y = 250
         menu_item_height = 70
         
-        # Update hover animation
         self.hover_alpha += 5 * self.hover_alpha_direction
         if self.hover_alpha >= 100:
             self.hover_alpha_direction = -1
@@ -131,7 +110,6 @@ class BrickBreakerMenu:
             self.hover_alpha_direction = 1
         
         for i, item in enumerate(self.menu_items):
-            # Menu item background
             menu_rect = pygame.Rect(
                 (SCREEN_WIDTH - menu_width) // 2, 
                 menu_start_y + i * (menu_item_height + 20), 
@@ -148,10 +126,9 @@ class BrickBreakerMenu:
                 s.fill(UI_BACKGROUND)
             self.screen.blit(s, menu_rect)
             
-            # Border with glow effect for hovered item
+            # Border with glow effect if hovered
             border_color = self.menu_colors[i]
             if i == self.hovered_item:
-                # Draw multiple lines for glow effect
                 for offset in range(4):
                     pygame.draw.line(
                         self.screen,
@@ -175,20 +152,26 @@ class BrickBreakerMenu:
             text_rect = text_surface.get_rect(midleft=(menu_rect.left + 20, menu_rect.centery))
             self.screen.blit(text_surface, text_rect)
 
+    def open_login_signup(self):
+        print("Transition to Login/Sign Up screen")
+        from login import LoginScreen
+        login_screen = LoginScreen(self.screen)
+        username = login_screen.run()
+        if username:
+            self.current_user = username
+
     def run(self):
         running = True
         while running:
+            mouse_pos = pygame.mouse.get_pos()
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                
-                # esc to quit
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-
                 if event.type == pygame.MOUSEMOTION:
-                    mouse_pos = pygame.mouse.get_pos()
                     menu_width = 500
                     menu_start_y = 250
                     menu_item_height = 70
@@ -204,13 +187,10 @@ class BrickBreakerMenu:
                         if menu_rect.collidepoint(mouse_pos):
                             self.hovered_item = i
                             break
-                
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = pygame.mouse.get_pos()
                     menu_width = 500
                     menu_start_y = 250
                     menu_item_height = 70
-                    
                     for i, item in enumerate(self.menu_items):
                         menu_rect = pygame.Rect(
                             (SCREEN_WIDTH - menu_width) // 2,
@@ -218,14 +198,16 @@ class BrickBreakerMenu:
                             menu_width,
                             menu_item_height
                         )
-                        
                         if menu_rect.collidepoint(mouse_pos):
-                            if item == "Single Player":
-                                # Stop menu music before starting game
+                            if i == 0:
+                                if self.current_user:
+                                    print(f"Clicked user button for {self.current_user.capitalize()}")
+                                else:
+                                    self.open_login_signup()
+                            elif item == "Single Player":
                                 pygame.mixer.music.stop()
                                 game = Game(self.screen)
                                 game.run()
-                                # Restart menu music when returning from game
                                 try:
                                     music_path = os.path.join('Py', 'audio', 'background_music.mp3')
                                     pygame.mixer.music.load(music_path)
@@ -236,7 +218,6 @@ class BrickBreakerMenu:
                             elif item == "Quit":
                                 running = False
 
-            # Draw everything
             self.draw_background()
             self.draw_title()
             self.draw_menu()
