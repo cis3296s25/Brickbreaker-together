@@ -112,7 +112,7 @@ class Ball:
                 self.vy *= -1
 
                 if random.random() < 0.2:  # 20% chance to drop power-up
-                    direction = 'down' if is_top else 'up'  # Decide direction
+                    direction = 'up' if is_top else 'down' # Decide direction
                     self.game.powerups.append(PowerUp(brick['rect'].centerx, brick['rect'].centery, direction))
 
                 return "brick"
