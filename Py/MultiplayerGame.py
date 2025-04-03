@@ -161,8 +161,8 @@ class Game:
         self.bounds = pygame.Rect((SCREEN_WIDTH - GAME_WIDTH)//2, (SCREEN_HEIGHT - GAME_HEIGHT)//2, GAME_WIDTH, GAME_HEIGHT)
         self.player1 = Paddle(self.bounds.centerx - PADDLE_WIDTH//2, self.bounds.top + 20, PLAYER1_COLOR)
         self.player2 = Paddle(self.bounds.centerx - PADDLE_WIDTH//2, self.bounds.bottom - 20 - PADDLE_HEIGHT, PLAYER2_COLOR)
-        self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1,1])*BALL_SPEED/2, BALL_SPEED)
-        self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1,1])*BALL_SPEED/2, -BALL_SPEED)
+        self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1,1])*BALL_SPEED/2, BALL_SPEED, self)
+        self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1,1])*BALL_SPEED/2, -BALL_SPEED, self)
         self.bricks = []
         self.create_bricks()
         self.lives1 = LIVES
@@ -333,7 +333,7 @@ class Game:
 
         for powerup in self.powerups:
             powerup.draw(screen)
-            
+
         for brick in self.bricks:
             if brick['active']:
                 pygame.draw.rect(screen, brick['color'], brick['rect'], border_radius=4)
