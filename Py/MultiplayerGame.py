@@ -112,16 +112,18 @@ class Ball:
                 self.vy *= -1
 
                 if random.random() < 0.2:  # 20% chance to drop power-up
-                    self.game.powerups.append(PowerUp(brick['rect'].centerx, brick['rect'].centery))
+                    direction = 'down' if is_top else 'up'  # Decide direction
+                    self.game.powerups.append(PowerUp(brick['rect'].centerx, brick['rect'].centery, direction))
 
                 return "brick"
             
 class PowerUp:
-    def __init__(self, x, y):
+    def __init__(self, x, y, direction='down'):
         self.rect = pygame.Rect(x - 15, y - 15, 30, 30)
         self.type = random.choice(['slow_ball', 'extra_life'])
         self.speed = 3
-
+        # direction
+        self.speed = 3 if direction == 'down' else -3  # moves down or up
         self.color_map = {
             'slow_ball': (241, 196, 15),  # Yellow
             'extra_life': (46, 204, 113), # Green
