@@ -10,7 +10,6 @@ def connect_db():
     )
 
 # User Accounts
-
 def get_user_by_username(username):
     conn = connect_db()
     cursor = conn.cursor(dictionary=True)
@@ -32,8 +31,7 @@ def create_user(username, password):
     cursor.close()
     conn.close()
 
-# ---------- High Scores ----------
-
+# High Scores
 def update_high_score(user_id, score):
     """
     Insert a new score or update an existing high score if the new score is greater.
@@ -72,7 +70,6 @@ def get_high_score(user_id):
     return row['score'] if row else None
 
 # Friend Relationships
-
 def add_friend(user_id1, user_id2):
     """
     Add a friendship between two users.
@@ -88,7 +85,6 @@ def add_friend(user_id1, user_id2):
         cursor.execute(query, (u1, u2))
         conn.commit()
     except mysql.connector.Error as err:
-        # Optionally, handle error (e.g., duplicate friendship)
         print("Error adding friend:", err)
     cursor.close()
     conn.close()
@@ -116,7 +112,6 @@ def get_friends(user_id):
     return [row['friend_id'] for row in rows]
 
 # Multiplayer Sessions
-
 def create_session(session_name):
     """
     Create a new game session.
@@ -145,8 +140,7 @@ def get_session(session_id):
     conn.close()
     return row
 
-# ---------- Session Participants ----------
-
+# Session Participants
 def add_session_participant(session_id, user_id):
     """
     Add a user to a game session.
