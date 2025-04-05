@@ -215,6 +215,17 @@ class BrickBreakerMenu:
                                     pygame.mixer.music.play(-1)
                                 except Exception as e:
                                     print(f"Could not reload menu music: {e}")
+                            elif item == "Multiple Player":
+                                pygame.mixer.music.stop()
+                                from MultiplayerGame import run_game
+                                run_game(self.screen)
+                                try:
+                                    music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+                                    pygame.mixer.music.load(music_path)
+                                    pygame.mixer.music.set_volume(0.5)
+                                    pygame.mixer.music.play(-1)
+                                except Exception as e:
+                                    print(f"Could not reload menu music: {e}")
                             elif item == "Quit":
                                 running = False
 
