@@ -32,7 +32,7 @@ def create_user(username, password):
     cursor.close()
     conn.close()
 
-# ---------- High Scores ----------
+# High Scores
 
 def update_high_score(user_id, score):
     """
@@ -88,7 +88,6 @@ def add_friend(user_id1, user_id2):
         cursor.execute(query, (u1, u2))
         conn.commit()
     except mysql.connector.Error as err:
-        # Optionally, handle error (e.g., duplicate friendship)
         print("Error adding friend:", err)
     cursor.close()
     conn.close()
@@ -145,7 +144,7 @@ def get_session(session_id):
     conn.close()
     return row
 
-# ---------- Session Participants ----------
+# Session Participants
 
 def add_session_participant(session_id, user_id):
     """
