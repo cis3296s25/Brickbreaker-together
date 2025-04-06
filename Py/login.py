@@ -12,9 +12,9 @@ from db import get_user_by_username
 pygame.init()
 pygame.font.init()
 pygame.mixer.init()
-init_screen_dimensions()  # Initialize screen dimensions after pygame.init()
+init_screen_dimensions()
 
-# Define MAIN button color (yellow/orange)
+
 MAIN_COLOR = (243, 156, 18)
 
 class LoginScreen:

@@ -75,11 +75,10 @@ python main.py
 
 ## Power-ups
 
-- 🔴 Red: Increases paddle size
-- 🔵 Blue: Slows down the ball
-- 🟢 Green: Multiplies the ball
-- 🟡 Yellow: Adds extra lives
-- 🟣 Purple: Shoots lasers from the paddle
+- 🔴 B: Bomb - Explodes multiple bricks
+- 🔵 M: Multiple Balls - User gets multiple balls (single player)
+- 🟢 S: Slow Ball - Ball slows down in speed
+- 🟡 +: Extra Life - Add lives
 
 ## Contributing
 
