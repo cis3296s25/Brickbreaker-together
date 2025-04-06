@@ -9,16 +9,19 @@ class PauseMenu:
         self.menu_buttons = []
         
     def draw(self, screen):
+        # Get screen dimensions from the screen object
+        screen_width, screen_height = screen.get_size()
+        
         # create overlay
-        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))  
         screen.blit(overlay, (0, 0))
         
         # menu panel
         menu_width = 300
         menu_height = 400
-        menu_x = WIDTH // 2 - menu_width // 2
-        menu_y = HEIGHT // 2 - menu_height // 2
+        menu_x = screen_width // 2 - menu_width // 2
+        menu_y = screen_height // 2 - menu_height // 2
         
         # shadow
         shadow_offset = 10
@@ -33,7 +36,7 @@ class PauseMenu:
         
         # title
         title = self.font_title.render("PAUSED", True, PRIMARY_COLOR)
-        title_rect = title.get_rect(center=(WIDTH // 2, menu_y + 30))
+        title_rect = title.get_rect(center=(screen_width // 2, menu_y + 30))
         screen.blit(title, title_rect)
         
         # buttons

@@ -59,20 +59,22 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and self.isGameInProgress:
-                self.isPaused = not self.isPaused
-                if self.isPaused:
-                    pygame.mixer.music.pause()
-                else:
-                    pygame.mixer.music.unpause()
-            
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                if self.waiting_for_start:
-                    self.waiting_for_start = False
-                    self.isGameInProgress = True
-                    self.isPaused = False
-                    for ball in self.balls:
-                        ball.reset(self.paddle)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+                elif event.key == pygame.K_p and self.isGameInProgress:
+                    self.isPaused = not self.isPaused
+                    if self.isPaused:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.unpause()
+                elif event.key == pygame.K_SPACE:
+                    if self.waiting_for_start:
+                        self.waiting_for_start = False
+                        self.isGameInProgress = True
+                        self.isPaused = False
+                        for ball in self.balls:
+                            ball.reset(self.paddle)
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
