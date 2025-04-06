@@ -67,6 +67,7 @@ class HowToPlayScreen:
                 "title": "Controls",
                 "content": [
                     "• Arrow Keys: Move the paddle left and right",
+                    "• 'A' & 'D' Keys: Move the paddle left and right (Local Multiple Player)",
                     "• P: Pause the game",
                     "• ESC: Exit to main menu",
                     "• Space: Launch the ball (in some game modes)"
@@ -83,11 +84,10 @@ class HowToPlayScreen:
             {
                 "title": "Power-Ups",
                 "content": [
-                    "• Red Power-Up: Increases paddle size",
-                    "• Blue Power-Up: Slows down the ball",
-                    "• Green Power-Up: Multiplies the ball",
-                    "• Yellow Power-Up: Adds extra lives",
-                    "• Purple Power-Up: Shoots lasers from the paddle"
+                    "• B: Bomb - Explodes multiple bricks",
+                    "• M: Multiple Balls - User gets multiple balls (single player)",
+                    "• S: Slow Ball - Ball slows down in speed",
+                    "• +: Extra Life - Add lives"
                 ]
             }
         ]
@@ -100,8 +100,8 @@ class HowToPlayScreen:
 
         self.column_width = int(400 * SCALE_FACTOR)
         self.col_gap = int(50 * SCALE_FACTOR)
-        self.left_column_x = (self.screen_width // 2) - (self.column_width + self.col_gap // 2)
-        self.right_column_x = (self.screen_width // 2) + (self.col_gap // 2)
+        self.left_column_x = int(50 * SCALE_FACTOR)
+        self.right_column_x = self.screen_width // 2 + int(50 * SCALE_FACTOR)
         self.column_top_y = int(180 * SCALE_FACTOR)
 
         self.maybe_scale_down_fonts()
@@ -243,72 +243,23 @@ class HowToPlayScreen:
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
+        
+        # Draw floating bricks
         for brick in self.floating_bricks:
             brick.update()
             brick.draw(self.screen)
-
-        title_surf = self.title_font.render("HOW TO PLAY", True, PRIMARY_COLOR)
-        title_rect = title_surf.get_rect(center=(self.screen_width // 2, int(100 * SCALE_FACTOR)))
-        for offset in range(3):
-            glow_surf = self.title_font.render("HOW TO PLAY", True, (*PRIMARY_COLOR[:3], 100 - offset * 30))
-            glow_rect = glow_surf.get_rect(center=(self.screen_width // 2, int(100 * SCALE_FACTOR)))
-            self.screen.blit(glow_surf, glow_rect)
-        self.screen.blit(title_surf, title_rect)
-
-        column_width = int(400 * SCALE_FACTOR)
-        center_x = self.screen_width // 2
-        left_column_x = center_x - column_width - int(150 * SCALE_FACTOR)
-        right_column_x = center_x + int(150 * SCALE_FACTOR)
         
-        left_column_y = int(180 * SCALE_FACTOR)
-        right_column_y = int(180 * SCALE_FACTOR)
+        # Draw title with glow effect
+        self.draw_title_with_glow()
         
-        title_content_spacing = int(15 * SCALE_FACTOR)
-        line_spacing = int(8 * SCALE_FACTOR)
-        section_spacing = int(30 * SCALE_FACTOR)
+        # Draw columns with sections
+        self.draw_columns()
         
-        max_content_widths = {}
-        for section in self.sections:
-            max_width = 0
-            for line in section["content"]:
-                text_surf = self.text_font.render(line, True, TEXT_COLOR)
-                max_width = max(max_width, text_surf.get_width())
-            max_content_widths[section["title"]] = max_width
-
-        for i, section in enumerate(self.sections):
-            is_left_column = i % 2 == 0
-            column_x = left_column_x if is_left_column else right_column_x
-            current_y = left_column_y if is_left_column else right_column_y
-            
-            content_height = 0
-            for line in section["content"]:
-                text_surf = self.text_font.render(line, True, TEXT_COLOR)
-                content_height += text_surf.get_height() + line_spacing
-            content_height -= line_spacing
-            
-            subtitle_surf = self.subtitle_font.render(section["title"], True, HOW_TO_PLAY_COLOR)
-            subtitle_rect = subtitle_surf.get_rect(midtop=(column_x + column_width // 2, current_y))
-            self.screen.blit(subtitle_surf, subtitle_rect)
-            
-            current_y = subtitle_rect.bottom + title_content_spacing
-            
-            content_start_x = column_x + (column_width - max_content_widths[section["title"]]) // 2
-            
-            for line in section["content"]:
-                text_surf = self.text_font.render(line, True, TEXT_COLOR)
-                text_rect = text_surf.get_rect(midtop=(content_start_x + max_content_widths[section["title"]] // 2, current_y))
-                self.screen.blit(text_surf, text_rect)
-                current_y = text_rect.bottom + line_spacing
-            
-            current_y += section_spacing
-            
-            if is_left_column:
-                left_column_y = current_y
-            else:
-                right_column_y = current_y
-
+        # Draw back button
         self.update_button_hover(self.hover_back)
         self.draw_button(self.back_button_rect, "BACK", hovered=self.hover_back)
+        
+        pygame.display.flip()
 
 if __name__ == "__main__":
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
