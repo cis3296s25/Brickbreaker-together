@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import time
 from multiplayer_pause import MultiplayerPauseMenu
 
 # Initialize Pygame
@@ -37,16 +38,38 @@ BALL_SPEED = 5
 PADDLE_SPEED = 8
 LIVES = 3
 
+# Global exit handler variables
+last_esc_press = 0
+esc_double_press_timeout = 0.5  # seconds
+
 font_size_scale = min(SCREEN_WIDTH / 1920, SCREEN_HEIGHT / 1080)
 title_font = pygame.font.SysFont('Arial', int(62 * font_size_scale), bold=True)
 label_font = pygame.font.SysFont('Arial', int(40 * font_size_scale), bold=True)
 score_font = pygame.font.SysFont('Arial', int(50 * font_size_scale), bold=True)
 small_font = pygame.font.SysFont('Arial', int(32 * font_size_scale))
-countdown_font = pygame.font.SysFont('Arial', int(150 * font_size_scale), bold=True)  # 添加倒计时字体
+countdown_font = pygame.font.SysFont('Arial', int(150 * font_size_scale), bold=True)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("BRICKBREAKER TOGETHER")
 clock = pygame.time.Clock()
+
+
+def handle_global_exit(events):
+    global last_esc_press
+    current_time = time.time()
+    for event in events:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                # Check if this is a double press
+                if current_time - last_esc_press < esc_double_press_timeout:
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    last_esc_press = current_time
+
 
 class Paddle:
     def __init__(self, x, y, color):
@@ -65,6 +88,7 @@ class Paddle:
     def draw(self):
         pygame.draw.rect(screen, self.color, self.rect, border_radius=10)
         pygame.draw.rect(screen, self.color, self.rect.inflate(4, 4), border_radius=12, width=2)
+
 
 class Ball:
     def __init__(self, x, y, color, vx, vy, game):
@@ -121,23 +145,22 @@ class Ball:
                 self.vy *= -1
 
                 if random.random() < 0.2:  # 20% chance to drop power-up
-                    direction = 'up' if is_top else 'down' # Decide direction
+                    direction = 'up' if is_top else 'down'  # Decide direction
                     self.game.powerups.append(PowerUp(brick['rect'].centerx, brick['rect'].centery, direction))
 
                 return "brick"
-            
+
+
 class PowerUp:
     def __init__(self, x, y, direction='down'):
         self.rect = pygame.Rect(x - 15, y - 15, 30, 30)
         self.type = random.choice(['slow_ball', 'extra_life'])
-        self.speed = 3
         # direction
         self.speed = 3 if direction == 'down' else -3  # moves down or up
         self.color_map = {
             'slow_ball': (241, 196, 15),  # Yellow
-            'extra_life': (46, 204, 113), # Green
+            'extra_life': (46, 204, 113),  # Green
         }
-
         self.label_map = {
             'slow_ball': 'S',
             'extra_life': '+',
@@ -167,14 +190,15 @@ class PowerUp:
             elif player == 2:
                 game.lives2 = min(game.lives2 + 1, LIVES)
 
+
 class Game:
     def __init__(self, screen):
         self.screen = screen
-        self.bounds = pygame.Rect((SCREEN_WIDTH - GAME_WIDTH)//2, (SCREEN_HEIGHT - GAME_HEIGHT)//2, GAME_WIDTH, GAME_HEIGHT)
-        self.player1 = Paddle(self.bounds.centerx - PADDLE_WIDTH//2, self.bounds.top + 20, PLAYER1_COLOR)
-        self.player2 = Paddle(self.bounds.centerx - PADDLE_WIDTH//2, self.bounds.bottom - 20 - PADDLE_HEIGHT, PLAYER2_COLOR)
-        self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1,1])*BALL_SPEED/2, BALL_SPEED, self)
-        self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1,1])*BALL_SPEED/2, -BALL_SPEED, self)
+        self.bounds = pygame.Rect((SCREEN_WIDTH - GAME_WIDTH) // 2, (SCREEN_HEIGHT - GAME_HEIGHT) // 2, GAME_WIDTH, GAME_HEIGHT)
+        self.player1 = Paddle(self.bounds.centerx - PADDLE_WIDTH // 2, self.bounds.top + 20, PLAYER1_COLOR)
+        self.player2 = Paddle(self.bounds.centerx - PADDLE_WIDTH // 2, self.bounds.bottom - 20 - PADDLE_HEIGHT, PLAYER2_COLOR)
+        self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, BALL_SPEED, self)
+        self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
         self.bricks = []
         self.create_bricks()
         self.lives1 = LIVES
@@ -208,36 +232,40 @@ class Game:
                 )
                 self.bricks.append({'rect': rect, 'active': True, 'color': BRICK_COLORS[row % len(BRICK_COLORS)]})
 
-    def handle_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return "quit"
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                if not self.paused:
-                    self.paused = True
-                else:
-                    self.paused = False
-            
-            # Handle pause menu clicks
+    def handle_input(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    self.paused = not self.paused
             if self.paused and event.type == pygame.MOUSEBUTTONDOWN:
                 action = self.pause_menu.check_menu_click(event.pos)
                 if action == "Continue":
                     self.paused = False
+                elif action == "Settings":
+                    # TODO: Implement settings menu
+                    pass
                 elif action == "Main Menu":
                     return "main_menu"
 
         if not self.paused:
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_a]: self.player1.move("left", self.bounds)
-            if keys[pygame.K_d]: self.player1.move("right", self.bounds)
-            if keys[pygame.K_LEFT]: self.player2.move("left", self.bounds)
-            if keys[pygame.K_RIGHT]: self.player2.move("right", self.bounds)
+            if keys[pygame.K_a]:
+                self.player1.move("left", self.bounds)
+            if keys[pygame.K_d]:
+                self.player1.move("right", self.bounds)
+            if keys[pygame.K_LEFT]:
+                self.player2.move("left", self.bounds)
+            if keys[pygame.K_RIGHT]:
+                self.player2.move("right", self.bounds)
             if keys[pygame.K_r] and self.winner:
                 self.__init__(self.screen)
 
         return None
 
     def update(self):
+        if self.paused:
+            return
+
         current_time = pygame.time.get_ticks()
 
         if not self.game_started:
@@ -300,18 +328,12 @@ class Game:
 
         # Respawn balls if inactive and lives remain
         if not self.ball1.active and self.lives1 > 0:
-            self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, BALL_SPEED, self)
+            self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR,
+                              random.choice([-1, 1]) * BALL_SPEED / 2, BALL_SPEED, self)
 
         if not self.ball2.active and self.lives2 > 0:
-            self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
-
-        # Determine the winner
-        # Respawn balls only if inactive and player still has lives
-        if not self.ball1.active and self.lives1 > 0:
-            self.ball1 = Ball(self.bounds.centerx, self.bounds.top + 60, PLAYER1_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, BALL_SPEED, self)
-
-        if not self.ball2.active and self.lives2 > 0:
-            self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR, random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
+            self.ball2 = Ball(self.bounds.centerx, self.bounds.bottom - 60, PLAYER2_COLOR,
+                              random.choice([-1, 1]) * BALL_SPEED / 2, -BALL_SPEED, self)
 
         # Once a player's lives reach zero, stop spawning their ball
         if self.lives1 <= 0:
@@ -339,21 +361,21 @@ class Game:
         # Title
         title = title_font.render("BRICKBREAKER", True, TEXT_COLOR)
         sub = small_font.render("TOGETHER", True, (180, 180, 180))
-        self.screen.blit(title, (SCREEN_WIDTH//2 - title.get_width()//2, 20))
-        self.screen.blit(sub, (SCREEN_WIDTH//2 - sub.get_width()//2, 70))
+        self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 20))
+        self.screen.blit(sub, (SCREEN_WIDTH // 2 - sub.get_width() // 2, 70))
 
         # Player stats
         def draw_stats(x, y, label, color, score, lives):
             lbl = label_font.render(label, True, color)
             val = score_font.render(f"{score:04d}", True, TEXT_COLOR)
-            self.screen.blit(lbl, (x - lbl.get_width()//2, y))
-            self.screen.blit(val, (x - val.get_width()//2, y + 40))
+            self.screen.blit(lbl, (x - lbl.get_width() // 2, y))
+            self.screen.blit(val, (x - val.get_width() // 2, y + 40))
             for i in range(LIVES):
                 clr = color if i < lives else (50, 50, 50)
                 pygame.draw.circle(self.screen, clr, (x - 35 + i * 35, y + 120), 12)
 
-        draw_stats(UI_WIDTH//2, SCREEN_HEIGHT//3, "PLAYER 1", PLAYER1_COLOR, self.player1.score, self.lives1)
-        draw_stats(SCREEN_WIDTH - UI_WIDTH//2, SCREEN_HEIGHT//3, "PLAYER 2", PLAYER2_COLOR, self.player2.score, self.lives2)
+        draw_stats(UI_WIDTH // 2, SCREEN_HEIGHT // 3, "PLAYER 1", PLAYER1_COLOR, self.player1.score, self.lives1)
+        draw_stats(SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_HEIGHT // 3, "PLAYER 2", PLAYER2_COLOR, self.player2.score, self.lives2)
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -363,8 +385,10 @@ class Game:
 
         self.player1.draw()
         self.player2.draw()
-        if self.ball1.active: self.ball1.draw()
-        if self.ball2.active: self.ball2.draw()
+        if self.ball1.active:
+            self.ball1.draw()
+        if self.ball2.active:
+            self.ball2.draw()
 
         for powerup in self.powerups:
             powerup.draw(self.screen)
@@ -378,42 +402,44 @@ class Game:
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))
             self.screen.blit(overlay, (0, 0))
-            
+
             countdown_text = countdown_font.render(str(self.countdown), True, TEXT_COLOR)
             scaled_width = int(countdown_text.get_width() * self.animation_scale)
             scaled_height = int(countdown_text.get_height() * self.animation_scale)
             if scaled_width > 0 and scaled_height > 0:
                 scaled_text = pygame.transform.scale(countdown_text, (scaled_width, scaled_height))
-                self.screen.blit(scaled_text, (SCREEN_WIDTH//2 - scaled_width//2, SCREEN_HEIGHT//2 - scaled_height//2))
+                self.screen.blit(scaled_text, (SCREEN_WIDTH // 2 - scaled_width // 2, SCREEN_HEIGHT // 2 - scaled_height // 2))
 
-        if self.winner:
+        if self.paused:
+            self.pause_menu.draw(self.screen)
+        elif self.winner:
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))
             self.screen.blit(overlay, (0, 0))
             msg = title_font.render("GAME OVER", True, TEXT_COLOR)
             win = score_font.render(self.winner, True, TEXT_COLOR)
             tip = small_font.render("Press R to restart", True, TEXT_COLOR)
-            self.screen.blit(msg, (SCREEN_WIDTH//2 - msg.get_width()//2, SCREEN_HEIGHT//2 - 60))
-            self.screen.blit(win, (SCREEN_WIDTH//2 - win.get_width()//2, SCREEN_HEIGHT//2))
-            self.screen.blit(tip, (SCREEN_WIDTH//2 - tip.get_width()//2, SCREEN_HEIGHT//2 + 60))
+            self.screen.blit(msg, (SCREEN_WIDTH // 2 - msg.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
+            self.screen.blit(win, (SCREEN_WIDTH // 2 - win.get_width() // 2, SCREEN_HEIGHT // 2))
+            self.screen.blit(tip, (SCREEN_WIDTH // 2 - tip.get_width() // 2, SCREEN_HEIGHT // 2 + 60))
 
-        if self.paused:
-            self.pause_menu.draw(self.screen)
-        
         pygame.display.flip()
+
 
 def run_game(screen):
     game = Game(screen)
     clock = pygame.time.Clock()
-    
+
     while True:
-        result = game.handle_input()
+        events = pygame.event.get()
+        handle_global_exit(events)
+        result = game.handle_input(events)
         if result == "main_menu":
             return
         elif result == "quit":
             pygame.quit()
             sys.exit()
-            
+
         game.update()
         game.draw()
         clock.tick(FPS)

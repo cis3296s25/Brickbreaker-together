@@ -52,6 +52,13 @@ class BrickBreakerMenu:
             "Quit"
         ]
         
+        # Multiplayer submenu items
+        self.multiplayer_items = [
+            "Local Multiplayer",
+            "Online Multiplayer",
+            "Back"
+        ]
+        
         # Colors for menu item borders
         self.menu_colors = [
             PINK,                 # For Login/Sign Up
@@ -61,11 +68,19 @@ class BrickBreakerMenu:
             ACCENT_COLOR          # Quit
         ]
         
+        # Colors for multiplayer submenu
+        self.multiplayer_colors = [
+            PRIMARY_COLOR,        # Local Multiplayer
+            SECONDARY_COLOR,      # Online Multiplayer
+            ACCENT_COLOR          # Back
+        ]
+        
         # Floating bricks
         self.floating_bricks = [FloatingBrick(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(5)]
         
         self.clock = pygame.time.Clock()
         self.hovered_item = None
+        self.show_multiplayer_menu = False
         
         # For hover animation on menu items
         self.hover_alpha = 0
@@ -91,66 +106,119 @@ class BrickBreakerMenu:
         self.screen.blit(tagline_surface, tagline_rect)
 
     def draw_menu(self):
-        # If a user is logged in, replace the first item text with the username
-        if self.current_user:
-            self.menu_items[0] = self.current_user.capitalize()
-            self.menu_colors[0] = TEAL
-        else:
-            self.menu_items[0] = "Login/Sign Up"
-            self.menu_colors[0] = PINK
-
         menu_width = 500
         menu_start_y = 250
         menu_item_height = 70
         
-        self.hover_alpha += 5 * self.hover_alpha_direction
-        if self.hover_alpha >= 100:
-            self.hover_alpha_direction = -1
-        elif self.hover_alpha <= 0:
-            self.hover_alpha_direction = 1
-        
-        for i, item in enumerate(self.menu_items):
-            menu_rect = pygame.Rect(
-                (SCREEN_WIDTH - menu_width) // 2, 
-                menu_start_y + i * (menu_item_height + 20), 
-                menu_width, 
-                menu_item_height
-            )
+        if self.show_multiplayer_menu:
+            items = self.multiplayer_items
+            colors = self.multiplayer_colors
             
-            # Semi-transparent background
-            s = pygame.Surface((menu_width, menu_item_height), pygame.SRCALPHA)
-            if i == self.hovered_item:
-                hover_color = (*self.menu_colors[i][:3], 50 + self.hover_alpha)
-                s.fill(hover_color)
-            else:
-                s.fill(UI_BACKGROUND)
-            self.screen.blit(s, menu_rect)
+            self.hover_alpha += 5 * self.hover_alpha_direction
+            if self.hover_alpha >= 100:
+                self.hover_alpha_direction = -1
+            elif self.hover_alpha <= 0:
+                self.hover_alpha_direction = 1
             
-            # Border with glow effect if hovered
-            border_color = self.menu_colors[i]
-            if i == self.hovered_item:
-                for offset in range(4):
+            for i, (item, color) in enumerate(zip(items, colors)):
+                menu_rect = pygame.Rect(
+                    (SCREEN_WIDTH - menu_width) // 2,
+                    menu_start_y + i * (menu_item_height + 20),
+                    menu_width,
+                    menu_item_height
+                )
+                
+                # Semi-transparent background
+                s = pygame.Surface((menu_width, menu_item_height), pygame.SRCALPHA)
+                if i == self.hovered_item:
+                    hover_color = (*color[:3], 50 + self.hover_alpha)
+                    s.fill(hover_color)
+                else:
+                    s.fill(UI_BACKGROUND)
+                self.screen.blit(s, menu_rect)
+                
+                # Border with glow effect if hovered
+                border_color = color
+                if i == self.hovered_item:
+                    for offset in range(4):
+                        pygame.draw.line(
+                            self.screen,
+                            (*border_color[:3], 100 - offset * 25),
+                            (menu_rect.left - offset, menu_rect.top),
+                            (menu_rect.left - offset, menu_rect.bottom),
+                            2
+                        )
+                else:
                     pygame.draw.line(
                         self.screen,
-                        (*border_color[:3], 100 - offset * 25),
-                        (menu_rect.left - offset, menu_rect.top),
-                        (menu_rect.left - offset, menu_rect.bottom),
-                        2
+                        border_color,
+                        (menu_rect.left, menu_rect.top),
+                        (menu_rect.left, menu_rect.bottom),
+                        4
                     )
+                
+                # Text with color change on hover
+                text_color = color if i == self.hovered_item else TEXT_COLOR
+                text_surface = self.menu_font.render(item, True, text_color)
+                text_rect = text_surface.get_rect(midleft=(menu_rect.left + 20, menu_rect.centery))
+                self.screen.blit(text_surface, text_rect)
+        else:
+            # If a user is logged in, replace the first item text with the username
+            if self.current_user:
+                self.menu_items[0] = self.current_user.capitalize()
+                self.menu_colors[0] = TEAL
             else:
-                pygame.draw.line(
-                    self.screen,
-                    border_color,
-                    (menu_rect.left, menu_rect.top),
-                    (menu_rect.left, menu_rect.bottom),
-                    4
-                )
+                self.menu_items[0] = "Login/Sign Up"
+                self.menu_colors[0] = PINK
+
+            self.hover_alpha += 5 * self.hover_alpha_direction
+            if self.hover_alpha >= 100:
+                self.hover_alpha_direction = -1
+            elif self.hover_alpha <= 0:
+                self.hover_alpha_direction = 1
             
-            # Text with color change on hover
-            text_color = self.menu_colors[i] if i == self.hovered_item else TEXT_COLOR
-            text_surface = self.menu_font.render(item, True, text_color)
-            text_rect = text_surface.get_rect(midleft=(menu_rect.left + 20, menu_rect.centery))
-            self.screen.blit(text_surface, text_rect)
+            for i, item in enumerate(self.menu_items):
+                menu_rect = pygame.Rect(
+                    (SCREEN_WIDTH - menu_width) // 2,
+                    menu_start_y + i * (menu_item_height + 20),
+                    menu_width,
+                    menu_item_height
+                )
+                
+                # Semi-transparent background
+                s = pygame.Surface((menu_width, menu_item_height), pygame.SRCALPHA)
+                if i == self.hovered_item:
+                    hover_color = (*self.menu_colors[i][:3], 50 + self.hover_alpha)
+                    s.fill(hover_color)
+                else:
+                    s.fill(UI_BACKGROUND)
+                self.screen.blit(s, menu_rect)
+                
+                # Border with glow effect if hovered
+                border_color = self.menu_colors[i]
+                if i == self.hovered_item:
+                    for offset in range(4):
+                        pygame.draw.line(
+                            self.screen,
+                            (*border_color[:3], 100 - offset * 25),
+                            (menu_rect.left - offset, menu_rect.top),
+                            (menu_rect.left - offset, menu_rect.bottom),
+                            2
+                        )
+                else:
+                    pygame.draw.line(
+                        self.screen,
+                        border_color,
+                        (menu_rect.left, menu_rect.top),
+                        (menu_rect.left, menu_rect.bottom),
+                        4
+                    )
+                
+                # Text with color change on hover
+                text_color = self.menu_colors[i] if i == self.hovered_item else TEXT_COLOR
+                text_surface = self.menu_font.render(item, True, text_color)
+                text_rect = text_surface.get_rect(midleft=(menu_rect.left + 20, menu_rect.centery))
+                self.screen.blit(text_surface, text_rect)
 
     def open_login_signup(self):
         print("Transition to Login/Sign Up screen")
@@ -177,7 +245,8 @@ class BrickBreakerMenu:
                     menu_item_height = 70
                     
                     self.hovered_item = None
-                    for i, item in enumerate(self.menu_items):
+                    items = self.multiplayer_items if self.show_multiplayer_menu else self.menu_items
+                    for i, item in enumerate(items):
                         menu_rect = pygame.Rect(
                             (SCREEN_WIDTH - menu_width) // 2,
                             menu_start_y + i * (menu_item_height + 20),
@@ -191,48 +260,68 @@ class BrickBreakerMenu:
                     menu_width = 500
                     menu_start_y = 250
                     menu_item_height = 70
-                    for i, item in enumerate(self.menu_items):
-                        menu_rect = pygame.Rect(
-                            (SCREEN_WIDTH - menu_width) // 2,
-                            menu_start_y + i * (menu_item_height + 20),
-                            menu_width,
-                            menu_item_height
-                        )
-                        if menu_rect.collidepoint(mouse_pos):
-                            if i == 0:
-                                if self.current_user:
-                                    print(f"Clicked user button for {self.current_user.capitalize()}")
-                                else:
-                                    self.open_login_signup()
-                            elif item == "Single Player":
-                                pygame.mixer.music.stop()
-                                game = Game(self.screen)
-                                game.run()
-                                try:
-                                    music_path = os.path.join('Py', 'audio', 'background_music.mp3')
-                                    pygame.mixer.music.load(music_path)
-                                    pygame.mixer.music.set_volume(0.5)
-                                    pygame.mixer.music.play(-1)
-                                except Exception as e:
-                                    print(f"Could not reload menu music: {e}")
-                            elif item == "Multiple Player":
-                                pygame.mixer.music.stop()
-                                from MultiplayerGame import run_game
-                                run_game(self.screen)
-                                try:
-                                    music_path = os.path.join('Py', 'audio', 'background_music.mp3')
-                                    pygame.mixer.music.load(music_path)
-                                    pygame.mixer.music.set_volume(0.5)
-                                    pygame.mixer.music.play(-1)
-                                except Exception as e:
-                                    print(f"Could not reload menu music: {e}")
-                            elif item == "Quit":
-                                running = False
-
+                    
+                    if self.show_multiplayer_menu:
+                        items = self.multiplayer_items
+                        for i, item in enumerate(items):
+                            menu_rect = pygame.Rect(
+                                (SCREEN_WIDTH - menu_width) // 2,
+                                menu_start_y + i * (menu_item_height + 20),
+                                menu_width,
+                                menu_item_height
+                            )
+                            if menu_rect.collidepoint(mouse_pos):
+                                if item == "Local Multiplayer":
+                                    pygame.mixer.music.stop()
+                                    from MultiplayerGame import run_game
+                                    run_game(self.screen)
+                                    try:
+                                        music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+                                        pygame.mixer.music.load(music_path)
+                                        pygame.mixer.music.set_volume(0.5)
+                                        pygame.mixer.music.play(-1)
+                                    except Exception as e:
+                                        print(f"Could not reload menu music: {e}")
+                                elif item == "Online Multiplayer":
+                                    # TODO: Implement online multiplayer using server and client)
+                                    pass
+                                elif item == "Back":
+                                    self.show_multiplayer_menu = False
+                                break
+                    else:
+                        for i, item in enumerate(self.menu_items):
+                            menu_rect = pygame.Rect(
+                                (SCREEN_WIDTH - menu_width) // 2,
+                                menu_start_y + i * (menu_item_height + 20),
+                                menu_width,
+                                menu_item_height
+                            )
+                            if menu_rect.collidepoint(mouse_pos):
+                                if i == 0:
+                                    if self.current_user:
+                                        print(f"Clicked user button for {self.current_user.capitalize()}")
+                                    else:
+                                        self.open_login_signup()
+                                elif item == "Single Player":
+                                    pygame.mixer.music.stop()
+                                    game = Game(self.screen)
+                                    game.run()
+                                    try:
+                                        music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+                                        pygame.mixer.music.load(music_path)
+                                        pygame.mixer.music.set_volume(0.5)
+                                        pygame.mixer.music.play(-1)
+                                    except Exception as e:
+                                        print(f"Could not reload menu music: {e}")
+                                elif item == "Multiple Player":
+                                    self.show_multiplayer_menu = True
+                                elif item == "Quit":
+                                    running = False
+                                break
+            
             self.draw_background()
             self.draw_title()
             self.draw_menu()
-
             pygame.display.flip()
             self.clock.tick(60)
 
