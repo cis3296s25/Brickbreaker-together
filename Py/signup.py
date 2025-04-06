@@ -14,77 +14,98 @@ pygame.font.init()
 pygame.mixer.init()
 init_screen_dimensions()  # Initialize screen dimensions after pygame.init()
 
+# Define MAIN button color (yellow/orange)
+MAIN_COLOR = (243, 156, 18)
+
 class SignUpScreen:
     def __init__(self, screen):
         self.screen = screen
-        self.screen_width = screen.get_width()
-        self.screen_height = screen.get_height()
+        # Use constant screen dimensions from settings.py
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
+
+        # Fonts
         self.title_font = pygame.font.SysFont('Segoe UI', TITLE_FONT_SIZE, bold=True)
         self.input_font = pygame.font.SysFont('Segoe UI', LABEL_FONT_SIZE)
         self.button_font = pygame.font.SysFont('Segoe UI', SMALL_FONT_SIZE)
+
+        # Floating bricks for background animation
         self.floating_bricks = [FloatingBrick(self.screen_width, self.screen_height) for _ in range(5)]
 
+        # Input texts
         self.username_text = ""
         self.password_text = ""
         self.confirm_text = ""
         self.active_input = "username"
 
-        # Calculate UI element positions and sizes
+        # Layout dimensions
         input_width = int(400 * SCALE_FACTOR)
         input_height = int(50 * SCALE_FACTOR)
         button_width = int(160 * SCALE_FACTOR)
         button_height = int(50 * SCALE_FACTOR)
         small_button_height = int(40 * SCALE_FACTOR)
-        
+
         self.username_box = pygame.Rect(
-            self.screen_width//2 - input_width//2,
+            self.screen_width // 2 - input_width // 2,
             int(220 * SCALE_FACTOR),
             input_width,
             input_height
         )
         self.password_box = pygame.Rect(
-            self.screen_width//2 - input_width//2,
+            self.screen_width // 2 - input_width // 2,
             int(290 * SCALE_FACTOR),
             input_width,
             input_height
         )
         self.confirm_box = pygame.Rect(
-            self.screen_width//2 - input_width//2,
+            self.screen_width // 2 - input_width // 2,
             int(360 * SCALE_FACTOR),
             input_width,
             input_height
         )
         self.signup_button_rect = pygame.Rect(
-            self.screen_width//2 - button_width//2,
+            self.screen_width // 2 - button_width // 2,
             int(430 * SCALE_FACTOR),
             button_width,
             button_height
         )
         self.goto_login_rect = pygame.Rect(
-            self.screen_width//2 - button_width//2,
+            self.screen_width // 2 - button_width // 2,
             int(490 * SCALE_FACTOR),
             button_width,
             small_button_height
         )
+        self.goto_menu_rect = pygame.Rect(
+            self.screen_width // 2 - button_width // 2,
+            int(540 * SCALE_FACTOR),
+            button_width,
+            button_height
+        )
 
-        self.hover_signup = False
-        self.hover_login = False
+        # Hover state flags and alpha values (for animation)
         self.hover_alpha_signup = 0
         self.hover_alpha_direction_signup = 1
         self.hover_alpha_login = 0
         self.hover_alpha_direction_login = 1
+        self.hover_alpha_menu = 0
+        self.hover_alpha_direction_menu = 1
+
+        self.hover_signup = False
+        self.hover_login = False
+        self.hover_menu = False
+
         self.error_message = ""
         self.clock = pygame.time.Clock()
 
-        self.result_status = None
+        # For tab-based focus cycling
         self.focus_list = ["username", "password", "confirm", "signup_button"]
+        self.result_status = None  # "ACCOUNT_CREATED", "OPEN_LOGIN", "BACK_TO_MENU"
 
     def run(self):
         running = True
         while running:
             self.clock.tick(60)
             mouse_pos = pygame.mouse.get_pos()
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -104,7 +125,7 @@ class SignUpScreen:
                 elif event.type == pygame.MOUSEMOTION:
                     self.handle_mouse_motion(mouse_pos)
 
-            if self.result_status in ("ACCOUNT_CREATED", "OPEN_LOGIN"):
+            if self.result_status in ("ACCOUNT_CREATED", "OPEN_LOGIN", "BACK_TO_MENU"):
                 return self.result_status
 
             self.draw()
@@ -152,15 +173,18 @@ class SignUpScreen:
         if self.goto_login_rect.collidepoint(pos):
             self.result_status = "OPEN_LOGIN"
 
+        if self.goto_menu_rect.collidepoint(pos):
+            self.result_status = "BACK_TO_MENU"
+
     def handle_mouse_motion(self, mouse_pos):
         self.hover_signup = self.signup_button_rect.collidepoint(mouse_pos)
         self.hover_login = self.goto_login_rect.collidepoint(mouse_pos)
+        self.hover_menu = self.goto_menu_rect.collidepoint(mouse_pos)
 
     def attempt_signup(self):
         username = self.username_text.strip()
         password = self.password_text.strip()
         confirm = self.confirm_text.strip()
-
         if not username or not password or not confirm:
             self.error_message = "Please fill all fields."
             return
@@ -185,92 +209,121 @@ class SignUpScreen:
             brick.update()
             brick.draw(self.screen)
 
+        # Draw title with glow effect
         title_surf = self.title_font.render("SIGN UP", True, PRIMARY_COLOR)
-        title_rect = title_surf.get_rect(center=(self.screen_width//2, 150))
+        title_rect = title_surf.get_rect(center=(self.screen_width // 2, 150))
+        for offset in range(3):
+            glow_surf = self.title_font.render("SIGN UP", True, (*PRIMARY_COLOR[:3], 100 - offset * 30))
+            glow_rect = glow_surf.get_rect(center=(self.screen_width // 2, 150))
+            self.screen.blit(glow_surf, glow_rect)
         self.screen.blit(title_surf, title_rect)
 
+        # Mask password fields
         masked_pw = "*" * len(self.password_text)
         masked_cf = "*" * len(self.confirm_text)
 
+        # Draw input boxes
         self.draw_input_box(self.username_box, self.username_text, "Username", active=(self.active_input=="username"))
         self.draw_input_box(self.password_box, masked_pw, "Password", active=(self.active_input=="password"))
         self.draw_input_box(self.confirm_box, masked_cf, "Confirm", active=(self.active_input=="confirm"))
 
-        self.update_button_hover("signup")
-        self.update_button_hover("login")
+        # Update hover alphas
+        self.update_button_hover("SIGN UP", self.hover_signup)
+        self.update_button_hover("LOGIN", self.hover_login)
+        self.update_button_hover("BACK", self.hover_menu)
 
-        self.draw_button(self.signup_button_rect, "SIGN UP", hovered=self.hover_signup, is_signup=True)
-        self.draw_button(self.goto_login_rect, "LOGIN", hovered=self.hover_login, is_signup=False)
+        # Ensure all buttons are the same width
+        signup_w = self.button_font.size("SIGN UP")[0]
+        login_w = self.button_font.size("LOGIN")[0]
+        main_w = self.button_font.size("BACK")[0]
+        max_w = max(signup_w, login_w, main_w)
+        button_width = max_w + 40
 
+        self.signup_button_rect.width = button_width
+        self.goto_login_rect.width = button_width
+        self.goto_menu_rect.width = button_width
+        self.signup_button_rect.centerx = self.screen_width // 2
+        self.goto_login_rect.centerx = self.screen_width // 2
+        self.goto_menu_rect.centerx = self.screen_width // 2
+
+        # Draw buttons with unified style
+        self.draw_button(self.signup_button_rect, "SIGN UP", hovered=self.hover_signup)
+        self.draw_button(self.goto_login_rect, "LOGIN", hovered=self.hover_login)
+        self.draw_button(self.goto_menu_rect, "BACK", hovered=self.hover_menu)
+
+        # Draw error message if exists
         if self.error_message:
             err_surf = self.input_font.render(self.error_message, True, ACCENT_COLOR)
-            err_rect = err_surf.get_rect(center=(self.screen_width//2, 560))
+            err_rect = err_surf.get_rect(center=(self.screen_width // 2, 610))
             self.screen.blit(err_surf, err_rect)
 
     def draw_input_box(self, rect, text, placeholder, active=False):
-        pygame.draw.rect(self.screen, (30,30,30), rect)
-        border_color = PRIMARY_COLOR if active else (100,100,100)
-        pygame.draw.rect(self.screen, border_color, rect, 2)
+        s = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+        s.fill((18, 18, 18, 215))
+        self.screen.blit(s, rect)
+        border_color = PRIMARY_COLOR if active else (100, 100, 100)
+        if active:
+            for offset in range(3):
+                pygame.draw.rect(self.screen, (*border_color[:3], 100 - offset * 30), rect.inflate(offset*2, offset*2), border_radius=5)
+        else:
+            pygame.draw.rect(self.screen, border_color, rect, 2, border_radius=5)
         display_text = placeholder if (not text and not active) else text
         font_surf = self.input_font.render(display_text, True, TEXT_COLOR)
-        self.screen.blit(font_surf, (rect.x+10, rect.y+10))
+        self.screen.blit(font_surf, (rect.x + 10, rect.y + 10))
 
-    def update_button_hover(self, which):
-        if which == "signup":
-            if self.hover_signup:
+    def update_button_hover(self, button_text, is_hovered):
+        if button_text == "SIGN UP":
+            if is_hovered:
                 self.hover_alpha_signup += 5 * self.hover_alpha_direction_signup
                 if self.hover_alpha_signup >= 100:
                     self.hover_alpha_direction_signup = -1
                 elif self.hover_alpha_signup <= 0:
-                    self.hover_alpha_signup = 0
+                    self.hover_alpha_direction_signup = 1
             else:
-                if self.hover_alpha_signup > 0:
-                    self.hover_alpha_signup -= 5
-                    if self.hover_alpha_signup < 0:
-                        self.hover_alpha_signup = 0
-        else:
-            if self.hover_login:
+                self.hover_alpha_signup = max(self.hover_alpha_signup - 5, 0)
+        elif button_text == "LOGIN":
+            if is_hovered:
                 self.hover_alpha_login += 5 * self.hover_alpha_direction_login
                 if self.hover_alpha_login >= 100:
                     self.hover_alpha_direction_login = -1
                 elif self.hover_alpha_login <= 0:
-                    self.hover_alpha_login = 0
+                    self.hover_alpha_direction_login = 1
             else:
-                if self.hover_alpha_login > 0:
-                    self.hover_alpha_login -= 5
-                    if self.hover_alpha_login < 0:
-                        self.hover_alpha_login = 0
+                self.hover_alpha_login = max(self.hover_alpha_login - 5, 0)
+        elif button_text == "BACK":
+            if is_hovered:
+                self.hover_alpha_menu += 5 * self.hover_alpha_direction_menu
+                if self.hover_alpha_menu >= 100:
+                    self.hover_alpha_direction_menu = -1
+                elif self.hover_alpha_menu <= 0:
+                    self.hover_alpha_direction_menu = 1
+            else:
+                self.hover_alpha_menu = max(self.hover_alpha_menu - 5, 0)
 
-    def draw_button(self, rect, text, hovered=False, is_signup=True):
-        alpha_val = 50
-        if hovered:
-            if is_signup:
-                alpha_val = 50 + self.hover_alpha_signup
-            else:
-                alpha_val = 50 + self.hover_alpha_login
+    def draw_button(self, rect, text, hovered=False):
+        if text.upper() == "SIGN UP":
+            base_color = SECONDARY_COLOR
+            alpha = 50 + self.hover_alpha_signup
+        elif text.upper() == "LOGIN":
+            base_color = PRIMARY_COLOR
+            alpha = 50 + self.hover_alpha_login
+        elif text.upper() == "BACK":
+            base_color = MAIN_COLOR
+            alpha = 50 + self.hover_alpha_menu
+        else:
+            base_color = TEXT_COLOR
+            alpha = 50
 
         s = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-        s.fill((*SECONDARY_COLOR[:3], alpha_val))
-        self.screen.blit(s, (rect.x, rect.y))
-
         if hovered:
-            for offset in range(4):
-                pygame.draw.line(
-                    self.screen,
-                    (*SECONDARY_COLOR, 100 - offset * 25),
-                    (rect.left - offset, rect.top),
-                    (rect.left - offset, rect.bottom),
-                    2
-                )
+            s.fill((*base_color[:3], alpha))
         else:
-            pygame.draw.line(
-                self.screen,
-                SECONDARY_COLOR,
-                (rect.left, rect.top),
-                (rect.left, rect.bottom),
-                4
-            )
+            s.fill((18, 18, 18, 215))
+        self.screen.blit(s, rect)
 
-        txt_surf = self.button_font.render(text, True, TEXT_COLOR)
+        pygame.draw.rect(self.screen, base_color, rect, 4, border_radius=5)
+
+        text_color = base_color if hovered else TEXT_COLOR
+        txt_surf = self.button_font.render(text, True, text_color)
         txt_rect = txt_surf.get_rect(center=rect.center)
         self.screen.blit(txt_surf, txt_rect)

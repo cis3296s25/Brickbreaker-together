@@ -20,6 +20,9 @@ init_screen_dimensions()
 class BrickBreakerMenu:
     def __init__(self, screen):
         self.screen = screen  # Store the screen object
+        # Use constant screen dimensions from settings.py
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
 
         pygame.display.set_caption("BrickBreaker Together")
         
@@ -43,6 +46,7 @@ class BrickBreakerMenu:
             "Single Player",
             "Multiple Player", 
             "Settings", 
+            "How to Play",
             "Quit"
         ]
         
@@ -59,6 +63,7 @@ class BrickBreakerMenu:
             PRIMARY_COLOR,        # Single Player
             SECONDARY_COLOR,      # Multiple Player
             (243, 156, 18),       # Settings (Orange)
+            (52, 152, 219),       # How to Play (Light Blue)
             ACCENT_COLOR          # Quit
         ]
         
@@ -219,6 +224,9 @@ class BrickBreakerMenu:
         from login import LoginScreen
         login_screen = LoginScreen(self.screen)
         username = login_screen.run()
+        if username == "BACK_TO_MENU":
+            print("Returning to main menu")
+            return
         if username:
             self.current_user = username
 
@@ -268,16 +276,8 @@ class BrickBreakerMenu:
                             )
                             if menu_rect.collidepoint(mouse_pos):
                                 if item == "Local Multiplayer":
-                                    pygame.mixer.music.stop()
                                     from MultiplayerGame import run_game
                                     run_game(self.screen)
-                                    try:
-                                        music_path = os.path.join('Py', 'audio', 'background_music.mp3')
-                                        pygame.mixer.music.load(music_path)
-                                        pygame.mixer.music.set_volume(0.5)
-                                        pygame.mixer.music.play(-1)
-                                    except Exception as e:
-                                        print(f"Could not reload menu music: {e}")
                                 elif item == "Online Multiplayer":
                                     # TODO: Implement online multiplayer using server and client)
                                     pass
@@ -311,6 +311,10 @@ class BrickBreakerMenu:
                                         print(f"Could not reload menu music: {e}")
                                 elif item == "Multiple Player":
                                     self.show_multiplayer_menu = True
+                                elif item == "How to Play":
+                                    from How import HowToPlayScreen
+                                    how_to_play = HowToPlayScreen(self.screen)
+                                    how_to_play.run()
                                 elif item == "Quit":
                                     running = False
                                 break
