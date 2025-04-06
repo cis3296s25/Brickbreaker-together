@@ -24,8 +24,8 @@ class Ball:
         self.rect.centerx = paddle.rect.centerx
         self.rect.bottom = paddle.rect.top
 
-        MIN_VERTICAL_SPEED = 2  # Prevent near-horizontal bouncing
-        MIN_HORIZONTAL_SPEED = 1.5  # Enforce minimum horizontal drifting
+        MIN_VERTICAL_SPEED = int(2 * SCALE_FACTOR)  # Prevent near-horizontal bouncing
+        MIN_HORIZONTAL_SPEED = int(1.5 * SCALE_FACTOR)  # Enforce minimum horizontal drifting
 
         while True:
             # Favor near-vertical shots (around 90° or π/2)
@@ -57,11 +57,11 @@ class Ball:
         self.rect.y += self.dy * speed_modifier #consider the speed modifier
 
         # Bounce off left and right walls
-        if self.rect.left <= 80 or self.rect.right >= WIDTH - 80:
+        if self.rect.left <= int(80 * SCALE_FACTOR) or self.rect.right >= SCREEN_WIDTH - int(80 * SCALE_FACTOR):
             self.dx = -self.dx
 
         # Bounce off top wall
-        if self.rect.top <= 140:
+        if self.rect.top <= int(140 * SCALE_FACTOR):
             self.dy = -self.dy
 
         # Bounce off paddle
@@ -85,7 +85,7 @@ class Ball:
                     bx, by = brick.rect.center
 
                     for b in bricks[:]:
-                        if abs(b.rect.centerx - bx) <= BRICK_WIDTH + 10 and abs(b.rect.centery - by) <= BRICK_HEIGHT + 10:
+                        if abs(b.rect.centerx - bx) <= BRICK_WIDTH + int(10 * SCALE_FACTOR) and abs(b.rect.centery - by) <= BRICK_HEIGHT + int(10 * SCALE_FACTOR):
                             bricks.remove(b)
 
                     game.bomb_ready = False  # Clear bomb after use

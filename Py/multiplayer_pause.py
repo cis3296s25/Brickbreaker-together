@@ -3,8 +3,8 @@ from settings import *
 
 class MultiplayerPauseMenu:
     def __init__(self):
-        self.font_menu = pygame.font.Font(None, 36)
-        self.font_title = pygame.font.Font(None, 48)
+        self.font_menu = pygame.font.Font(None, LABEL_FONT_SIZE)
+        self.font_title = pygame.font.Font(None, TITLE_FONT_SIZE)
         self.menu_options = ['Continue', 'Settings', 'Main Menu']
         self.menu_buttons = []
         
@@ -18,45 +18,46 @@ class MultiplayerPauseMenu:
         screen.blit(overlay, (0, 0))
         
         # Menu panel
-        menu_width = 300
-        menu_height = 400  # Same height as single player for three options
+        menu_width = int(300 * SCALE_FACTOR)
+        menu_height = int(400 * SCALE_FACTOR)  # Same height as single player for three options
         menu_x = screen_width // 2 - menu_width // 2
         menu_y = screen_height // 2 - menu_height // 2
         
         # Shadow
-        shadow_offset = 10
+        shadow_offset = int(10 * SCALE_FACTOR)
         shadow = pygame.Rect(menu_x + shadow_offset, menu_y + shadow_offset, 
                            menu_width, menu_height)
-        pygame.draw.rect(screen, (0, 0, 0, 100), shadow, 0, 12)
+        pygame.draw.rect(screen, (0, 0, 0, 100), shadow, 0, int(12 * SCALE_FACTOR))
         
         # Main menu panel
         menu_rect = pygame.Rect(menu_x, menu_y, menu_width, menu_height)
-        pygame.draw.rect(screen, (30, 30, 30), menu_rect, 0, 12)
-        pygame.draw.rect(screen, PRIMARY_COLOR, menu_rect, 2, 12)
+        pygame.draw.rect(screen, (30, 30, 30), menu_rect, 0, int(12 * SCALE_FACTOR))
+        pygame.draw.rect(screen, PRIMARY_COLOR, menu_rect, 2, int(12 * SCALE_FACTOR))
         
         # Title
         title = self.font_title.render("PAUSED", True, PRIMARY_COLOR)
-        title_rect = title.get_rect(center=(screen_width // 2, menu_y + 30))
+        title_rect = title.get_rect(center=(screen_width // 2, menu_y + int(30 * SCALE_FACTOR)))
         screen.blit(title, title_rect)
         
         # Buttons
-        button_height = 50
-        button_margin = 20
+        button_height = int(50 * SCALE_FACTOR)
+        button_margin = int(20 * SCALE_FACTOR)
         self.menu_buttons = []
         
         for i, option in enumerate(self.menu_options):
-            button_y = menu_y + 100 + i * (button_height + button_margin)
-            button_rect = pygame.Rect(menu_x + 50, button_y, menu_width - 100, button_height)
+            button_y = menu_y + int(100 * SCALE_FACTOR) + i * (button_height + button_margin)
+            button_rect = pygame.Rect(menu_x + int(50 * SCALE_FACTOR), button_y, 
+                                    menu_width - int(100 * SCALE_FACTOR), button_height)
             self.menu_buttons.append(button_rect)
             
             # Button shadow and hover effect
             mouse_pos = pygame.mouse.get_pos()
             if button_rect.collidepoint(mouse_pos):
                 pygame.draw.rect(screen, (PRIMARY_COLOR[0], PRIMARY_COLOR[1], PRIMARY_COLOR[2], 200),
-                               button_rect, 0, 8)
-                pygame.draw.rect(screen, (255, 255, 255), button_rect, 2, 8)
+                               button_rect, 0, int(8 * SCALE_FACTOR))
+                pygame.draw.rect(screen, (255, 255, 255), button_rect, 2, int(8 * SCALE_FACTOR))
             else:
-                pygame.draw.rect(screen, PRIMARY_COLOR, button_rect, 0, 8)
+                pygame.draw.rect(screen, PRIMARY_COLOR, button_rect, 0, int(8 * SCALE_FACTOR))
             
             # Button text
             text = self.font_menu.render(option, True, (255, 255, 255))

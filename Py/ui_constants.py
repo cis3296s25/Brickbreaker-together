@@ -1,5 +1,6 @@
 import pygame
 import random
+from settings import *
 
 PRIMARY_COLOR = (52, 152, 219)
 SECONDARY_COLOR = (46, 204, 113)
@@ -13,8 +14,8 @@ TEAL = (0, 128, 128)
 
 class FloatingBrick:
     def __init__(self, screen_width, screen_height):
-        self.width = 60
-        self.height = 20
+        self.width = int(60 * SCALE_FACTOR)
+        self.height = int(20 * SCALE_FACTOR)
         self.x = random.randint(0, screen_width - self.width)
         self.y = screen_height
         self.color = random.choice([
@@ -23,9 +24,9 @@ class FloatingBrick:
             ACCENT_COLOR, 
             (243, 156, 18)  # Orange color
         ])
-        self.speed = random.uniform(0.5, 2)
+        self.speed = random.uniform(0.5, 2) * SCALE_FACTOR
         self.rotation = 0
-        self.rotation_speed = random.uniform(-2, 2)
+        self.rotation_speed = random.uniform(-2, 2) * SCALE_FACTOR
 
     def update(self):
         self.y -= self.speed

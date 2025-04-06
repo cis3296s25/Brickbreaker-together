@@ -3,17 +3,11 @@ import sys
 import random
 import time
 from multiplayer_pause import MultiplayerPauseMenu
+from settings import *
 
 # Initialize Pygame
 pygame.init()
-
-# Get screen info for fullscreen
-screen_info = pygame.display.Info()
-SCREEN_WIDTH = screen_info.current_w
-SCREEN_HEIGHT = screen_info.current_h
-UI_WIDTH = int(SCREEN_WIDTH * 0.15)
-GAME_WIDTH = int(SCREEN_WIDTH * 0.65)
-GAME_HEIGHT = int(SCREEN_HEIGHT * 0.75)
+init_screen_dimensions()
 
 # Colors and constants
 BACKGROUND_COLOR = (18, 18, 18)
@@ -26,16 +20,16 @@ BRICK_COLORS = [
     (19, 79, 149), (12, 61, 123)
 ]
 FPS = 60
-PADDLE_WIDTH = int(150)
-PADDLE_HEIGHT = int(10)
-BALL_RADIUS = int(8)
-BRICK_WIDTH = int(54)
-BRICK_HEIGHT = int(20)
+PADDLE_WIDTH = int(150 * SCALE_FACTOR)
+PADDLE_HEIGHT = int(10 * SCALE_FACTOR)
+BALL_RADIUS = int(8 * SCALE_FACTOR)
+BRICK_WIDTH = int(54 * SCALE_FACTOR)
+BRICK_HEIGHT = int(20 * SCALE_FACTOR)
 BRICK_ROWS = 10
 BRICK_COLS = 15
-BRICK_PADDING = int(8)
-BALL_SPEED = 5
-PADDLE_SPEED = 8
+BRICK_PADDING = int(8 * SCALE_FACTOR)
+BALL_SPEED = int(5 * SCALE_FACTOR)
+PADDLE_SPEED = int(8 * SCALE_FACTOR)
 LIVES = 3
 
 # Global exit handler variables
@@ -43,11 +37,11 @@ last_esc_press = 0
 esc_double_press_timeout = 0.5  # seconds
 
 font_size_scale = min(SCREEN_WIDTH / 1920, SCREEN_HEIGHT / 1080)
-title_font = pygame.font.SysFont('Arial', int(62 * font_size_scale), bold=True)
-label_font = pygame.font.SysFont('Arial', int(40 * font_size_scale), bold=True)
-score_font = pygame.font.SysFont('Arial', int(50 * font_size_scale), bold=True)
-small_font = pygame.font.SysFont('Arial', int(32 * font_size_scale))
-countdown_font = pygame.font.SysFont('Arial', int(150 * font_size_scale), bold=True)
+title_font = pygame.font.SysFont('Arial', TITLE_FONT_SIZE, bold=True)
+label_font = pygame.font.SysFont('Arial', LABEL_FONT_SIZE, bold=True)
+score_font = pygame.font.SysFont('Arial', SCORE_FONT_SIZE, bold=True)
+small_font = pygame.font.SysFont('Arial', SMALL_FONT_SIZE)
+countdown_font = pygame.font.SysFont('Arial', COUNTDOWN_FONT_SIZE, bold=True)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("BRICKBREAKER TOGETHER")
@@ -63,12 +57,9 @@ def handle_global_exit(events):
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                # Check if this is a double press
-                if current_time - last_esc_press < esc_double_press_timeout:
-                    pygame.quit()
-                    sys.exit()
-                else:
-                    last_esc_press = current_time
+                # Exit on single press
+                pygame.quit()
+                sys.exit()
 
 
 class Paddle:
@@ -99,7 +90,7 @@ class Ball:
         self.radius = BALL_RADIUS
         self.color = color
         self.active = True
-        self.game = game  # <-- store reference to game instance
+        self.game = game
 
     def move(self, speed_modifier=1.0):
         if self.active:

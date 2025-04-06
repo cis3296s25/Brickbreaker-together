@@ -5,8 +5,8 @@ from pause import PauseMenu
 
 class UI:
     def __init__(self):
-        self.font_large = pygame.font.Font(None, 42)
-        self.font_score = pygame.font.Font(None, 60)
+        self.font_large = pygame.font.Font(None, TITLE_FONT_SIZE)
+        self.font_score = pygame.font.Font(None, SCORE_FONT_SIZE)
         self.pause_menu = PauseMenu()
         
         # Container dimensions will be set in draw_container
@@ -22,7 +22,7 @@ class UI:
         self.game_area_y = None
         
         # Pause button dimensions will be set in draw_container
-        self.pause_btn_radius = 20
+        self.pause_btn_radius = int(20 * SCALE_FACTOR)
         self.pause_btn_x = None
         self.pause_btn_y = None
 
@@ -44,23 +44,28 @@ class UI:
         screen_width, screen_height = screen.get_size()
         
         # Update container dimensions
-        self.container_width = screen_width - 100
-        self.container_height = screen_height - 100
+        self.container_width = screen_width - int(100 * SCALE_FACTOR)
+        self.container_height = screen_height - int(100 * SCALE_FACTOR)
         self.container_x = (screen_width - self.container_width) // 2
         self.container_y = (screen_height - self.container_height) // 2
         
         # Update game area dimensions
-        self.game_area_width = self.container_width - 4
-        self.game_area_height = self.container_height - 60  # Space for top UI
-        self.game_area_x = self.container_x + 2
-        self.game_area_y = self.container_y + 56
+        self.game_area_width = self.container_width - int(4 * SCALE_FACTOR)
+        self.game_area_height = self.container_height - int(60 * SCALE_FACTOR)  # Space for top UI
+        self.game_area_x = self.container_x + int(2 * SCALE_FACTOR)
+        self.game_area_y = self.container_y + int(56 * SCALE_FACTOR)
         
         # Update pause button position
-        self.pause_btn_x = self.container_x + self.container_width - 40
-        self.pause_btn_y = self.container_y + 28
+        self.pause_btn_x = self.container_x + self.container_width - int(40 * SCALE_FACTOR)
+        self.pause_btn_y = self.container_y + int(28 * SCALE_FACTOR)
         
         # Draw the game container
-        container_rect = pygame.Rect(60, 50, screen_width - 120, screen_height - 100)
+        container_rect = pygame.Rect(
+            int(60 * SCALE_FACTOR), 
+            int(50 * SCALE_FACTOR), 
+            screen_width - int(120 * SCALE_FACTOR), 
+            screen_height - int(100 * SCALE_FACTOR)
+        )
         pygame.draw.rect(screen, (30, 30, 30), container_rect)  # Dark background
         pygame.draw.rect(screen, PRIMARY_COLOR, container_rect, 2)  # Border
     
@@ -70,8 +75,10 @@ class UI:
             return
             
         for i in range(lives):
-            pygame.draw.circle(screen, (231, 76, 60), 
-                             (self.container_x + 30 + i * 30, self.container_y + 28), 10)
+            pygame.draw.circle(screen, LIFE_COLOR, 
+                             (self.container_x + int(30 * SCALE_FACTOR) + i * int(30 * SCALE_FACTOR), 
+                              self.container_y + int(28 * SCALE_FACTOR)), 
+                             int(10 * SCALE_FACTOR))
     
     def draw_score(self, screen, score):
         """Draw the player's current score"""
@@ -80,7 +87,7 @@ class UI:
             
         screen_width = screen.get_width()
         score_text = self.font_score.render(f"{score:05d}", True, PRIMARY_COLOR)
-        score_rect = score_text.get_rect(center=(screen_width // 2, self.container_y + 28))
+        score_rect = score_text.get_rect(center=(screen_width // 2, self.container_y + int(28 * SCALE_FACTOR)))
         screen.blit(score_text, score_rect)
     
     def draw_pause_button(self, screen, is_paused):
@@ -95,22 +102,28 @@ class UI:
         if not is_paused:
             # Draw pause icon (two vertical bars)
             pygame.draw.rect(screen, (255, 255, 255), 
-                           (self.pause_btn_x - 5, self.pause_btn_y - 8, 3, 16), 0)
+                           (self.pause_btn_x - int(5 * SCALE_FACTOR), 
+                            self.pause_btn_y - int(8 * SCALE_FACTOR), 
+                            int(3 * SCALE_FACTOR), 
+                            int(16 * SCALE_FACTOR)), 0)
             pygame.draw.rect(screen, (255, 255, 255), 
-                           (self.pause_btn_x + 2, self.pause_btn_y - 8, 3, 16), 0)
+                           (self.pause_btn_x + int(2 * SCALE_FACTOR), 
+                            self.pause_btn_y - int(8 * SCALE_FACTOR), 
+                            int(3 * SCALE_FACTOR), 
+                            int(16 * SCALE_FACTOR)), 0)
         else:
             # Draw play icon (triangle)
             pygame.draw.polygon(screen, (255, 255, 255), 
-                             [(self.pause_btn_x - 5, self.pause_btn_y - 8), 
-                              (self.pause_btn_x - 5, self.pause_btn_y + 8), 
-                              (self.pause_btn_x + 7, self.pause_btn_y)])
+                             [(self.pause_btn_x - int(5 * SCALE_FACTOR), self.pause_btn_y - int(8 * SCALE_FACTOR)), 
+                              (self.pause_btn_x - int(5 * SCALE_FACTOR), self.pause_btn_y + int(8 * SCALE_FACTOR)), 
+                              (self.pause_btn_x + int(7 * SCALE_FACTOR), self.pause_btn_y)])
     
     def draw_button(self, screen):
         """Draw the UI button in the corner (separate from pause button)"""
-        button_width = 30
-        button_height = 30
-        button_x = screen.get_width() - button_width - 20
-        button_y = screen.get_height() //10
+        button_width = int(30 * SCALE_FACTOR)
+        button_height = int(30 * SCALE_FACTOR)
+        button_x = screen.get_width() - button_width - int(20 * SCALE_FACTOR)
+        button_y = screen.get_height() // 10
         self.button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
         pygame.draw.rect(screen, (52, 152, 219), self.button_rect)
         
@@ -138,11 +151,11 @@ class UI:
     def draw_game_over(self, screen):
         """Draw the game over screen"""
         screen_width, screen_height = screen.get_size()
-        font = pygame.font.Font(None, 72)
+        font = pygame.font.Font(None, TITLE_FONT_SIZE)
         game_over_text = font.render("GAME OVER", True, PRIMARY_COLOR)
         restart_text = font.render("Press R to Restart", True, PRIMARY_COLOR)
         quit_text = font.render("Press Q to Quit", True, PRIMARY_COLOR)
 
-        screen.blit(game_over_text, (screen_width // 2 - game_over_text.get_width() // 2, screen_height // 2 - 50))
+        screen.blit(game_over_text, (screen_width // 2 - game_over_text.get_width() // 2, screen_height // 2 - int(50 * SCALE_FACTOR)))
         screen.blit(restart_text, (screen_width // 2 - restart_text.get_width() // 2, screen_height // 2))
-        screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + 50))
+        screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + int(50 * SCALE_FACTOR)))

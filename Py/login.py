@@ -1,6 +1,7 @@
 import pygame
 import sys
 import hashlib
+from settings import *
 from ui_constants import (
     PRIMARY_COLOR, SECONDARY_COLOR, BACKGROUND_COLOR,
     TEXT_COLOR, ACCENT_COLOR,
@@ -11,19 +12,53 @@ from db import get_user_by_username
 pygame.init()
 pygame.font.init()
 pygame.mixer.init()
+init_screen_dimensions()  # Initialize screen dimensions after pygame.init()
 
 class LoginScreen:
     def __init__(self, screen):
         self.screen = screen
         self.screen_width = screen.get_width()
         self.screen_height = screen.get_height()
-        self.title_font = pygame.font.SysFont('Segoe UI', 60, bold=True)
-        self.input_font = pygame.font.SysFont('Segoe UI', 32)
-        self.button_font = pygame.font.SysFont('Segoe UI', 28)
+        self.title_font = pygame.font.SysFont('Segoe UI', TITLE_FONT_SIZE, bold=True)
+        self.input_font = pygame.font.SysFont('Segoe UI', LABEL_FONT_SIZE)
+        self.button_font = pygame.font.SysFont('Segoe UI', SMALL_FONT_SIZE)
         self.floating_bricks = [FloatingBrick(self.screen_width, self.screen_height) for _ in range(5)]
         self.username_text = ""
         self.password_text = ""
         self.active_input = "username"
+        
+        # Calculate UI element positions and sizes
+        input_width = int(400 * SCALE_FACTOR)
+        input_height = int(50 * SCALE_FACTOR)
+        button_width = int(140 * SCALE_FACTOR)
+        button_height = int(50 * SCALE_FACTOR)
+        small_button_height = int(40 * SCALE_FACTOR)
+        
+        self.username_box = pygame.Rect(
+            self.screen_width//2 - input_width//2,
+            int(250 * SCALE_FACTOR),
+            input_width,
+            input_height
+        )
+        self.password_box = pygame.Rect(
+            self.screen_width//2 - input_width//2,
+            int(320 * SCALE_FACTOR),
+            input_width,
+            input_height
+        )
+        self.login_button_rect = pygame.Rect(
+            self.screen_width//2 - button_width//2,
+            int(400 * SCALE_FACTOR),
+            button_width,
+            button_height
+        )
+        self.goto_signup_rect = pygame.Rect(
+            self.screen_width//2 - button_width//2,
+            int(470 * SCALE_FACTOR),
+            button_width,
+            small_button_height
+        )
+        self.hover_login = False
         self.username_box = pygame.Rect(self.screen_width//2 - 200, 250, 400, 50)
         self.password_box = pygame.Rect(self.screen_width//2 - 200, 320, 400, 50)
         self.login_button_rect = pygame.Rect(self.screen_width//2 - 70, 400, 140, 50)
@@ -46,10 +81,12 @@ class LoginScreen:
             mouse_pos = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        running = False
+                        pygame.quit()
+                        sys.exit()
                     elif event.key == pygame.K_TAB:
                         self.cycle_focus()
                     elif event.key == pygame.K_RETURN:
