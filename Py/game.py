@@ -1,6 +1,7 @@
 import pygame
 import random
 import os
+import sys
 from settings import *
 from paddle import Paddle
 from ball import Ball
@@ -57,11 +58,13 @@ class Game:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                pygame.quit()
+                sys.exit()
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.running = False
+                    pygame.quit()
+                    sys.exit()
                 elif event.key == pygame.K_p and self.isGameInProgress:
                     self.isPaused = not self.isPaused
                     if self.isPaused:
@@ -132,13 +135,12 @@ class Game:
             if powerup.rect.colliderect(self.paddle.rect):
                 powerup.apply(self)
                 self.powerups.remove(powerup)
-            elif powerup.rect.top > HEIGHT:
+            elif powerup.rect.top > SCREEN_HEIGHT:
                 self.powerups.remove(powerup)
                 
         # Reset speed modifier after slow effect ends
         if self.speed_modifier < 1.0 and pygame.time.get_ticks() > self.slow_until:
             self.speed_modifier = 1.0
-
 
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -175,29 +177,35 @@ class Game:
         while waiting:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
-                    waiting = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
                         self.reset_game()
                         waiting = False
-                    if event.key == pygame.K_q:
-                        self.running = False
-                        waiting = False
+                    if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
 
     def create_bricks(self):
         available_colors = self.brick_colors.copy()
         random.shuffle(available_colors)
         
+        # Calculate brick layout dimensions
+        total_brick_width = COLS * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
+        total_brick_height = ROWS * (BRICK_HEIGHT + BRICK_PADDING) - BRICK_PADDING
+        
+        # Calculate starting position to center the brick layout
+        start_x = (SCREEN_WIDTH - total_brick_width) // 2
+        start_y = int(150 * SCALE_FACTOR)  # Top margin
+        
         self.bricks = []
         for y in range(ROWS):
             row_color = available_colors[y]
             for x in range(COLS):
-                self.bricks.append(
-                    Brick(x * (BRICK_WIDTH + 10) + 80, 
-                         y * (BRICK_HEIGHT + 10) + 150,
-                         row_color)
-                )
+                brick_x = start_x + x * (BRICK_WIDTH + BRICK_PADDING)
+                brick_y = start_y + y * (BRICK_HEIGHT + BRICK_PADDING)
+                self.bricks.append(Brick(brick_x, brick_y, row_color))
 
     def reset_game(self):
         self.lives = 3

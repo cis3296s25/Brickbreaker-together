@@ -4,9 +4,11 @@ from settings import *
 
 class PowerUp:
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, 30, 30)
+        # Scale powerup size with screen
+        powerup_size = int(30 * SCALE_FACTOR)
+        self.rect = pygame.Rect(x, y, powerup_size, powerup_size)
         self.type = random.choice(['bomb', 'multi_ball', 'extra_life', 'slow_ball'])
-        self.speed = 3
+        self.speed = int(3 * SCALE_FACTOR)
 
         self.color_map = {
             'bomb': (231, 76, 60),        # Red
@@ -28,8 +30,8 @@ class PowerUp:
         # Draw the power-up circle
         pygame.draw.ellipse(screen, self.color_map[self.type], self.rect)
 
-        # Draw the label text
-        font = pygame.font.Font(None, 24)
+        # Draw the label text with scaled font
+        font = pygame.font.Font(None, int(24 * SCALE_FACTOR))
         label = self.label_map[self.type]
         text = font.render(label, True, (0, 0, 0))
         text_rect = text.get_rect(center=self.rect.center)

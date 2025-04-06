@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 from game import Game
+from settings import *
 
 # Import colors and FloatingBrick from ui_constants.py
 from ui_constants import (
@@ -14,10 +15,7 @@ from ui_constants import (
 pygame.init()
 pygame.font.init()
 pygame.mixer.init()  # Initialize the mixer module
-
-# Screen Dimensions
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 700
+init_screen_dimensions()
 
 class BrickBreakerMenu:
     def __init__(self, screen):
@@ -34,14 +32,10 @@ class BrickBreakerMenu:
         except Exception as e:
             print(f"Could not load menu music: {e}")
         
-        global SCREEN_WIDTH, SCREEN_HEIGHT
-        SCREEN_WIDTH = screen.get_width()
-        SCREEN_HEIGHT = screen.get_height()
-        
         # Fonts
-        self.title_font = pygame.font.SysFont('Segoe UI', 80, bold=True)
-        self.tagline_font = pygame.font.SysFont('Segoe UI', 24)
-        self.menu_font = pygame.font.SysFont('Segoe UI', 32)
+        self.title_font = pygame.font.SysFont('Segoe UI', TITLE_FONT_SIZE, bold=True)
+        self.tagline_font = pygame.font.SysFont('Segoe UI', SMALL_FONT_SIZE)
+        self.menu_font = pygame.font.SysFont('Segoe UI', LABEL_FONT_SIZE)
         
         # Menu items
         self.menu_items = [
@@ -235,10 +229,12 @@ class BrickBreakerMenu:
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        running = False
+                        pygame.quit()
+                        sys.exit()
                 if event.type == pygame.MOUSEMOTION:
                     menu_width = 500
                     menu_start_y = 250
