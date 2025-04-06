@@ -12,6 +12,10 @@ from powerup import PowerUp
 class Game:
     def __init__(self, screen):
         self.screen = screen
+        # Use constant screen dimensions from settings.py
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
+        
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
         self.balls = [self.ball] #Now supports multiple balls

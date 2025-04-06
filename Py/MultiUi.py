@@ -51,10 +51,14 @@ small_font = pygame.font.SysFont('Arial', SMALL_FONT_SIZE)
 
 class UIElement:
     def __init__(self):
+        # Use constant screen dimensions from settings.py
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
+        
         # Calculate positions
         self.game_rect = pygame.Rect(
-            (SCREEN_WIDTH - GAME_WIDTH) // 2, 
-            (SCREEN_HEIGHT - GAME_HEIGHT) // 2 + int(20 * SCALE_FACTOR), 
+            (self.screen_width - GAME_WIDTH) // 2, 
+            (self.screen_height - GAME_HEIGHT) // 2 + int(20 * SCALE_FACTOR), 
             GAME_WIDTH, 
             GAME_HEIGHT
         )
@@ -133,22 +137,22 @@ class UIElement:
         screen.fill(BACKGROUND_COLOR)
         
         # Draw UI backgrounds
-        player1_ui_rect = pygame.Rect(0, 0, UI_WIDTH, SCREEN_HEIGHT)
-        player2_ui_rect = pygame.Rect(SCREEN_WIDTH - UI_WIDTH, 0, UI_WIDTH, SCREEN_HEIGHT)
+        player1_ui_rect = pygame.Rect(0, 0, UI_WIDTH, self.screen_height)
+        player2_ui_rect = pygame.Rect(self.screen_width - UI_WIDTH, 0, UI_WIDTH, self.screen_height)
         
         pygame.draw.rect(screen, (30, 30, 30), player1_ui_rect)
         pygame.draw.rect(screen, (30, 30, 30), player2_ui_rect)
         
         # Top border decorations for UI panels
         pygame.draw.line(screen, PLAYER1_COLOR, (0, 2), (UI_WIDTH, 2), 4)
-        pygame.draw.line(screen, PLAYER2_COLOR, (SCREEN_WIDTH - UI_WIDTH, 2), (SCREEN_WIDTH, 2), 4)
+        pygame.draw.line(screen, PLAYER2_COLOR, (self.screen_width - UI_WIDTH, 2), (self.screen_width, 2), 4)
         
         # Draw title
         title_text = title_font.render("BRICKBREAKER", True, (255, 255, 255))
         tagline_text = small_font.render("TOGETHER", True, (180, 180, 180))
         
-        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, int(20 * SCALE_FACTOR)))
-        screen.blit(tagline_text, (SCREEN_WIDTH // 2 - tagline_text.get_width() // 2, int(100 * SCALE_FACTOR)))
+        screen.blit(title_text, (self.screen_width // 2 - title_text.get_width() // 2, int(20 * SCALE_FACTOR)))
+        screen.blit(tagline_text, (self.screen_width // 2 - tagline_text.get_width() // 2, int(100 * SCALE_FACTOR)))
         
         # Draw game background
         pygame.draw.rect(screen, (0, 0, 0), self.game_rect, border_radius=12)
@@ -159,30 +163,30 @@ class UIElement:
         player1_label = label_font.render("PLAYER 1", True, PLAYER1_COLOR)
         player1_score = score_font.render(f"{self.player1_score:04d}", True, TEXT_COLOR)
         
-        screen.blit(player1_label, (UI_WIDTH // 2 - player1_label.get_width() // 2, SCREEN_HEIGHT // 3))
-        screen.blit(player1_score, (UI_WIDTH // 2 - player1_score.get_width() // 2, SCREEN_HEIGHT // 3 + int(50 * SCALE_FACTOR)))
+        screen.blit(player1_label, (UI_WIDTH // 2 - player1_label.get_width() // 2, self.screen_height // 3))
+        screen.blit(player1_score, (UI_WIDTH // 2 - player1_score.get_width() // 2, self.screen_height // 3 + int(50 * SCALE_FACTOR)))
         
         # Player 1 lives
         for i in range(LIVES):
             life_color = PLAYER1_COLOR if i < self.player1_lives else (50, 50, 50)
             pygame.draw.circle(screen, life_color, 
                               (UI_WIDTH // 2 - int(35 * SCALE_FACTOR) + i * int(35 * SCALE_FACTOR), 
-                               SCREEN_HEIGHT // 3 + int(150 * SCALE_FACTOR)), 
+                               self.screen_height // 3 + int(150 * SCALE_FACTOR)), 
                               int(12 * SCALE_FACTOR))
         
         # Player 2
         player2_label = label_font.render("PLAYER 2", True, PLAYER2_COLOR)
         player2_score = score_font.render(f"{self.player2_score:04d}", True, TEXT_COLOR)
         
-        screen.blit(player2_label, (SCREEN_WIDTH - UI_WIDTH // 2 - player2_label.get_width() // 2, SCREEN_HEIGHT // 3))
-        screen.blit(player2_score, (SCREEN_WIDTH - UI_WIDTH // 2 - player2_score.get_width() // 2, SCREEN_HEIGHT // 3 + int(50 * SCALE_FACTOR)))
+        screen.blit(player2_label, (self.screen_width - UI_WIDTH // 2 - player2_label.get_width() // 2, self.screen_height // 3))
+        screen.blit(player2_score, (self.screen_width - UI_WIDTH // 2 - player2_score.get_width() // 2, self.screen_height // 3 + int(50 * SCALE_FACTOR)))
         
         # Player 2 lives
         for i in range(LIVES):
             life_color = PLAYER2_COLOR if i < self.player2_lives else (50, 50, 50)
             pygame.draw.circle(screen, life_color, 
-                              (SCREEN_WIDTH - UI_WIDTH // 2 - int(35 * SCALE_FACTOR) + i * int(35 * SCALE_FACTOR), 
-                               SCREEN_HEIGHT // 3 + int(150 * SCALE_FACTOR)), 
+                              (self.screen_width - UI_WIDTH // 2 - int(35 * SCALE_FACTOR) + i * int(35 * SCALE_FACTOR), 
+                               self.screen_height // 3 + int(150 * SCALE_FACTOR)), 
                               int(12 * SCALE_FACTOR))
         
         # Draw paddles with glow effect

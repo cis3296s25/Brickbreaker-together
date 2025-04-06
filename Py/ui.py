@@ -5,6 +5,10 @@ from pause import PauseMenu
 
 class UI:
     def __init__(self):
+        # Use constant screen dimensions from settings.py
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
+        
         self.font_large = pygame.font.Font(None, TITLE_FONT_SIZE)
         self.font_score = pygame.font.Font(None, SCORE_FONT_SIZE)
         self.pause_menu = PauseMenu()
@@ -40,8 +44,9 @@ class UI:
             self.pause_menu.draw(screen)
     
     def draw_container(self, screen):
-        # Get screen dimensions
-        screen_width, screen_height = screen.get_size()
+        # Use constant screen dimensions from settings.py
+        screen_width = self.screen_width
+        screen_height = self.screen_height
         
         # Update container dimensions
         self.container_width = screen_width - int(100 * SCALE_FACTOR)
@@ -85,7 +90,7 @@ class UI:
         if self.container_x is None:
             return
             
-        screen_width = screen.get_width()
+        screen_width = self.screen_width
         score_text = self.font_score.render(f"{score:05d}", True, PRIMARY_COLOR)
         score_rect = score_text.get_rect(center=(screen_width // 2, self.container_y + int(28 * SCALE_FACTOR)))
         screen.blit(score_text, score_rect)
@@ -122,8 +127,8 @@ class UI:
         """Draw the UI button in the corner (separate from pause button)"""
         button_width = int(30 * SCALE_FACTOR)
         button_height = int(30 * SCALE_FACTOR)
-        button_x = screen.get_width() - button_width - int(20 * SCALE_FACTOR)
-        button_y = screen.get_height() // 10
+        button_x = self.screen_width - button_width - int(20 * SCALE_FACTOR)
+        button_y = self.screen_height // 10
         self.button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
         pygame.draw.rect(screen, (52, 152, 219), self.button_rect)
         
@@ -150,7 +155,8 @@ class UI:
         
     def draw_game_over(self, screen):
         """Draw the game over screen"""
-        screen_width, screen_height = screen.get_size()
+        screen_width = self.screen_width
+        screen_height = self.screen_height
         font = pygame.font.Font(None, TITLE_FONT_SIZE)
         game_over_text = font.render("GAME OVER", True, PRIMARY_COLOR)
         restart_text = font.render("Press R to Restart", True, PRIMARY_COLOR)
