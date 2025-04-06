@@ -2,6 +2,30 @@
 
 A modern multiplayer Brickbreaker game developed using PyGame, featuring both single-player and multiplayer modes. Break bricks, collect power-ups, and compete with friends in this classic arcade game reimagined!
 
+## Setup Instructions
+
+### Prerequisites
+- Python 3.8 or higher
+- Pygame library
+
+### Installation Steps
+
+1. Clone the repository:
+```bash
+git clone https://github.com/cis3296s25/Brickbreaker-together
+cd Brickbreaker-together
+```
+
+2. Install required dependencies:
+```bash
+pip install pygame
+```
+
+3. Run the game:
+```bash
+cd Py
+python main.py
+```
 ## Features
 
 - 🎮 Single Player Mode
@@ -41,34 +65,10 @@ Choose between Local Multiplayer and Online Multiplayer (coming soon) game modes
 ![Local Multiplayer](images/MultiPlayerLocal.png)
 Challenge your friends in an exciting split-screen multiplayer mode. Compete to see who can break the most bricks and achieve the highest score!
 
-## Setup Instructions
-
-### Prerequisites
-- Python 3.8 or higher
-- Pygame library
-
-### Installation Steps
-
-1. Clone the repository:
-```bash
-git clone https://github.com/cis3296s25/Brickbreaker-together
-cd Brickbreaker-together
-```
-
-2. Install required dependencies:
-```bash
-pip install pygame
-```
-
-3. Run the game:
-```bash
-cd Py
-python main.py
-```
-
 ## Controls
 
 - **Arrow Keys**: Move paddle left/right
+- **'A' and 'D' Keys**: Move paddle left/right (Local Multi-Player)
 - **P**: Pause game
 - **ESC**: Return to main menu
 - **Space**: Launch ball (in some game modes)
