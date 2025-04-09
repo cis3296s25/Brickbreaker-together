@@ -8,7 +8,7 @@ def main():
     init_screen_dimensions()
     
     # Get the screen size
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("BrickBreaker Together")
     
     menu = BrickBreakerMenu(screen)
