@@ -8,7 +8,7 @@ LIFE_COLOR = (231, 76, 60)
 
 
 # Paddle settings
-PADDLE_WIDTH, PADDLE_HEIGHT = 100, 10
+PADDLE_WIDTH, PADDLE_HEIGHT = 200, 10
 PADDLE_Y = HEIGHT - 70
 
 # Ball settings

@@ -40,7 +40,7 @@ class Ball:
         self.dy = dy
 
 
-    def move(self, paddle, bricks):
+    def move(self, paddle, bricks, game, speed_modifier=1.0):
         """
         Move the ball and handle collisions with walls, paddle, and bricks.
         Args
@@ -53,8 +53,8 @@ class Ball:
                 0 If nothing special happens
         """
         # Update the ball's position based on its velocity.
-        self.rect.x += self.dx
-        self.rect.y += self.dy
+        self.rect.x += self.dx * speed_modifier #consider the speed modifier
+        self.rect.y += self.dy * speed_modifier #consider the speed modifier
 
         # Bounce off left and right walls
         if self.rect.left <= 80 or self.rect.right >= WIDTH - 80:
@@ -66,6 +66,10 @@ class Ball:
 
         # Bounce off paddle
         if self.rect.colliderect(paddle.rect):
+            # Play paddle hit sound
+            if game.paddle_hit_sound:
+                game.paddle_hit_sound.play()
+                
             # Calculate hit position relative to paddle center
             hit_pos = (self.rect.centerx - paddle.rect.centerx) / (PADDLE_WIDTH // 2)
             angle = hit_pos * (math.pi / 3)  # Max angle deviation = 60 degrees
@@ -75,29 +79,58 @@ class Ball:
             self.dx = speed * math.sin(angle)
             self.dy = -abs(speed * math.cos(angle))  # Always bounce upward
 
-
+    
         # Bounce off bricks
         for brick in bricks[:]:
             if self.rect.colliderect(brick.rect): # Check if the brick is colliding
+                if game.bomb_ready:
+                # Trigger explosion (destroy surrounding bricks)
+                    explosion_radius = 1  # 3x3 grid
+                    bx, by = brick.rect.center
+
+                    for b in bricks[:]:
+                        if abs(b.rect.centerx - bx) <= BRICK_WIDTH + 10 and abs(b.rect.centery - by) <= BRICK_HEIGHT + 10:
+                            bricks.remove(b)
+
+                    game.bomb_ready = False  # Clear bomb after use
+                    if game.brick_hit_sound:
+                        game.brick_hit_sound.play()
+                    return 10  # Score increase
                 if self.rect.right >= brick.rect.left and self.rect.left < brick.rect.left:  # Ball hits right side of the brick
                     bricks.remove(brick)
+                    if(self.rect.top <= brick.rect.bottom and self.rect.bottom > brick.rect.bottom):
+                       self.dy= -self.dy
+                    if(self.rect.bottom >= brick.rect.top and self.rect.top < brick.rect.top):
+                       self.dy= -self.dy
                     self.dx = -self.dx + random.uniform(.1, 1)  # Reverse horizontal direction + speed up
+                    if game.brick_hit_sound:
+                        game.brick_hit_sound.play()
                     return 10  # Score increase
                 elif self.rect.left <= brick.rect.right and self.rect.right > brick.rect.right:  # Ball hits left side of the brick
                     bricks.remove(brick)
+                    if(self.rect.top <= brick.rect.bottom and self.rect.bottom > brick.rect.bottom):
+                       self.dy= -self.dy
+                    if(self.rect.bottom >= brick.rect.top and self.rect.top < brick.rect.top):
+                       self.dy= -self.dy
                     self.dx = -self.dx + random.uniform(.1, 1) # Reverse horizontal direction + speed up
+                    if game.brick_hit_sound:
+                        game.brick_hit_sound.play()
                     return 10  # Score increase
                 if self.rect.bottom >= brick.rect.top and self.rect.top < brick.rect.top:  # Ball hits the bottom of the brick
                     bricks.remove(brick)
                     self.dy = -self.dy + random.uniform(.1, 1) # Reverse vertical direction + speed up
+                    if game.brick_hit_sound:
+                        game.brick_hit_sound.play()
                     return 10  # Score increase
                 elif self.rect.top <= brick.rect.bottom and self.rect.bottom > brick.rect.bottom:  # Ball hits the top of the brick
                     bricks.remove(brick)
                     self.dy = -self.dy + random.uniform(.1, 1) # Reverse vertical direction + speed up
+                    if game.brick_hit_sound:
+                        game.brick_hit_sound.play()
                     return 10  # Score increase
 
         # If ball falls below paddle
-        if self.rect.top >= HEIGHT:
+        if self.rect.top >= paddle.rect.bottom:
             return -1  # Lose life
         
         return 0
