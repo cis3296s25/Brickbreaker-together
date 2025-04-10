@@ -83,6 +83,12 @@ class Game:
                         for ball in self.balls:
                             ball.reset(self.paddle)
 
+                elif event.key == pygame.K_n:
+                    self.current_level += 1
+                    self.create_bricks()
+                    self.waiting_for_start = True
+                    self.balls = [Ball(self.paddle)]
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 if self.ui.check_pause_button_click(mouse_pos) and self.isGameInProgress:
@@ -192,11 +198,11 @@ class Game:
 
     def create_bricks(self):
         layout = LEVELS[self.current_level % len(LEVELS)]
+
         self.bricks = []
-
-        total_width = len(layout[0]) * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
-        total_height = len(layout) * (BRICK_HEIGHT + BRICK_PADDING) - BRICK_PADDING
-
+        # Dynamically center based on columns
+        num_cols = max(len(row) for row in layout)
+        total_width = num_cols * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
         start_x = (SCREEN_WIDTH - total_width) // 2
         start_y = int(150 * SCALE_FACTOR)
 
