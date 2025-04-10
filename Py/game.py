@@ -8,22 +8,22 @@ from ball import Ball
 from brick import Brick
 from ui import UI
 from powerup import PowerUp
+from levels import LEVELS
 
 class Game:
     def __init__(self, screen):
         self.screen = screen
-        # Use constant screen dimensions from settings.py
         self.screen_width = SCREEN_WIDTH
         self.screen_height = SCREEN_HEIGHT
-        
+
         self.paddle = Paddle()
         self.ball = Ball(self.paddle)
-        self.balls = [self.ball] #Now supports multiple balls
+        self.balls = [self.ball]
         self.powerups = []
         self.bomb_ready = False
-        self.speed_modifier = 1.0  # Normal speed initially
+        self.speed_modifier = 1.0
         self.slow_until = 0
-        # Load game music
+
         try:
             self.game_music_path = os.path.join('Py', 'audio', 'game_music.mp3')
             pygame.mixer.music.load(self.game_music_path)
@@ -31,8 +31,7 @@ class Game:
             pygame.mixer.music.play(-1)
         except Exception as e:
             print(f"Could not load game music: {e}")
-        
-        # brick colors
+
         self.brick_colors = [
             (230, 245, 255),  
             (198, 231, 250), 
@@ -45,7 +44,8 @@ class Game:
             (19, 79, 149),    
             (12, 61, 123)   
         ]
-        
+
+        self.current_level = 0
         self.create_bricks()
         self.score = 0
         self.lives = 3
@@ -54,6 +54,7 @@ class Game:
         self.waiting_for_start = True
         self.isGameInProgress = False
         self.isPaused = False
+        self.show_level_complete = False
 
     def handle_events(self):
         keys = pygame.key.get_pressed()
@@ -64,7 +65,7 @@ class Game:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
@@ -82,7 +83,13 @@ class Game:
                         self.isPaused = False
                         for ball in self.balls:
                             ball.reset(self.paddle)
-            
+
+                elif event.key == pygame.K_n:
+                    self.current_level += 1
+                    self.create_bricks()
+                    self.waiting_for_start = True
+                    self.balls = [Ball(self.paddle)]
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 if self.ui.check_pause_button_click(mouse_pos) and self.isGameInProgress:
@@ -112,6 +119,24 @@ class Game:
                         except Exception as e:
                             print(f"Could not load menu music: {e}")
                         self.running = False
+                if self.show_level_complete:
+                    if self.level_complete_buttons["next"].collidepoint(event.pos):
+                        self.current_level += 1
+                        self.create_bricks()
+                        self.balls = [Ball(self.paddle)]
+                        self.waiting_for_start = True
+                        self.isGameInProgress = False
+                        self.show_level_complete = False
+
+                    elif self.level_complete_buttons["quit"].collidepoint(event.pos):
+                        from mainmenu import BrickBreakerMenu
+                        try:
+                            pygame.mixer.music.load(os.path.join("Py", "audio", "background_music.mp3"))
+                            pygame.mixer.music.play(-1)
+                        except:
+                            pass
+                        menu = BrickBreakerMenu(self.screen)
+                        menu.run()
 
     def update(self):
         if self.isGameInProgress and not self.isPaused:
@@ -120,7 +145,7 @@ class Game:
 
                 if result == 10:
                     self.score += 10
-                    if random.random() < 0.2:
+                    if random.random() < 0.8:
                         self.powerups.append(PowerUp(ball.rect.centerx, ball.rect.centery))
 
                 elif result == -1:
@@ -133,7 +158,6 @@ class Game:
                             new_ball = Ball(self.paddle)
                             self.balls.append(new_ball)
 
-        # Update powerups
         for powerup in self.powerups[:]:
             powerup.update()
             if powerup.rect.colliderect(self.paddle.rect):
@@ -141,18 +165,18 @@ class Game:
                 self.powerups.remove(powerup)
             elif powerup.rect.top > SCREEN_HEIGHT:
                 self.powerups.remove(powerup)
-                
-        # Reset speed modifier after slow effect ends
+
         if self.speed_modifier < 1.0 and pygame.time.get_ticks() > self.slow_until:
             self.speed_modifier = 1.0
 
+        if not self.bricks and self.isGameInProgress:
+            self.isGameInProgress = False
+            self.show_level_complete = True
+
     def draw(self):
         self.screen.fill(BACKGROUND_COLOR)
-
-        # First draw UI container
         self.ui.draw_container(self.screen)
 
-        # Then draw bricks and other game elements
         for brick in self.bricks:
             brick.draw(self.screen)
 
@@ -161,17 +185,17 @@ class Game:
 
         self.paddle.draw(self.screen)
 
-        # NOW draw all balls (on top of UI container)
         for ball in self.balls:
             ball.draw(self.screen)
 
-        # Finally draw UI elements (score, lives, etc.)
         self.ui.draw_lives(self.screen, self.lives)
         self.ui.draw_score(self.screen, self.score)
         self.ui.draw_pause_button(self.screen, self.isPaused)
 
         if self.isPaused:
             self.ui.pause_menu.draw(self.screen)
+        if self.show_level_complete:
+            self.draw_level_complete()
 
     def game_over(self):
         self.ui.draw_game_over(self.screen)
@@ -192,24 +216,22 @@ class Game:
                         sys.exit()
 
     def create_bricks(self):
-        available_colors = self.brick_colors.copy()
-        random.shuffle(available_colors)
-        
-        # Calculate brick layout dimensions
-        total_brick_width = COLS * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
-        total_brick_height = ROWS * (BRICK_HEIGHT + BRICK_PADDING) - BRICK_PADDING
-        
-        # Calculate starting position to center the brick layout
-        start_x = (SCREEN_WIDTH - total_brick_width) // 2
-        start_y = int(150 * SCALE_FACTOR)  # Top margin
-        
+        layout = LEVELS[self.current_level % len(LEVELS)]
+
         self.bricks = []
-        for y in range(ROWS):
-            row_color = available_colors[y]
-            for x in range(COLS):
-                brick_x = start_x + x * (BRICK_WIDTH + BRICK_PADDING)
-                brick_y = start_y + y * (BRICK_HEIGHT + BRICK_PADDING)
-                self.bricks.append(Brick(brick_x, brick_y, row_color))
+        # Dynamically center based on columns
+        num_cols = max(len(row) for row in layout)
+        total_width = num_cols * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
+        start_x = (SCREEN_WIDTH - total_width) // 2
+        start_y = int(150 * SCALE_FACTOR)
+
+        for row_idx, row in enumerate(layout):
+            for col_idx, brick_type in enumerate(row):
+                if brick_type:
+                    x = start_x + col_idx * (BRICK_WIDTH + BRICK_PADDING)
+                    y = start_y + row_idx * (BRICK_HEIGHT + BRICK_PADDING)
+                    color = random.choice(self.brick_colors)
+                    self.bricks.append(Brick(x, y, color))
 
     def reset_game(self):
         self.lives = 3
@@ -219,6 +241,34 @@ class Game:
         self.powerups.clear()
         self.bomb_ready = False
         self.slow_until = 0
+
+    def draw_level_complete(self):
+        overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))
+        self.screen.blit(overlay, (0, 0))
+
+        font = pygame.font.SysFont("Arial", 60)
+        msg = font.render("Level Passed!", True, (255, 255, 255))
+        prompt = font.render("Go to next level?", True, (180, 180, 180))
+
+        self.screen.blit(msg, (self.screen_width // 2 - msg.get_width() // 2, 300))
+        self.screen.blit(prompt, (self.screen_width // 2 - prompt.get_width() // 2, 380))
+
+        # Draw buttons
+        button_font = pygame.font.SysFont("Arial", 40)
+        next_btn = pygame.Rect(self.screen_width//2 - 200, 480, 160, 60)
+        quit_btn = pygame.Rect(self.screen_width//2 + 40, 480, 160, 60)
+
+        pygame.draw.rect(self.screen, (46, 204, 113), next_btn, border_radius=10)
+        pygame.draw.rect(self.screen, (231, 76, 60), quit_btn, border_radius=10)
+
+        next_text = button_font.render("Next", True, (0, 0, 0))
+        quit_text = button_font.render("Quit", True, (0, 0, 0))
+
+        self.screen.blit(next_text, next_btn.move(40, 10))
+        self.screen.blit(quit_text, quit_btn.move(40, 10))
+
+        self.level_complete_buttons = {"next": next_btn, "quit": quit_btn}
 
     def run(self):
         clock = pygame.time.Clock()
