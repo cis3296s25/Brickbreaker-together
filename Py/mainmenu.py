@@ -11,6 +11,9 @@ from ui_constants import (
     FloatingBrick
 )
 
+# Import SettingsUI for settings screen
+from settings_ui import SettingsUI
+
 # Initialize Pygame
 pygame.init()
 pygame.font.init()
@@ -111,8 +114,8 @@ class BrickBreakerMenu:
         text_surface = self.title_font.render('BRICKBREAKER', True, PRIMARY_COLOR)
         tagline_surface = self.tagline_font.render('TOGETHER', True, TEXT_COLOR)
         
-        text_rect = text_surface.get_rect(centerx=SCREEN_WIDTH//2, centery=100)
-        tagline_rect = tagline_surface.get_rect(centerx=SCREEN_WIDTH//2, top=text_rect.bottom + 10)
+        text_rect = text_surface.get_rect(centerx=self.screen_width//2, centery=100)
+        tagline_rect = tagline_surface.get_rect(centerx=self.screen_width//2, top=text_rect.bottom + 10)
         
         self.screen.blit(text_surface, text_rect)
         self.screen.blit(tagline_surface, tagline_rect)
@@ -134,7 +137,7 @@ class BrickBreakerMenu:
             
             for i, (item, color) in enumerate(zip(items, colors)):
                 menu_rect = pygame.Rect(
-                    (SCREEN_WIDTH - menu_width) // 2,
+                    (self.screen_width - menu_width) // 2,
                     menu_start_y + i * (menu_item_height + 20),
                     menu_width,
                     menu_item_height
@@ -191,7 +194,7 @@ class BrickBreakerMenu:
             
             for i, item in enumerate(self.menu_items):
                 menu_rect = pygame.Rect(
-                    (SCREEN_WIDTH - menu_width) // 2,
+                    (self.screen_width - menu_width) // 2,
                     menu_start_y + i * (menu_item_height + 20),
                     menu_width,
                     menu_item_height
@@ -265,7 +268,7 @@ class BrickBreakerMenu:
                     items = self.multiplayer_items if self.show_multiplayer_menu else self.menu_items
                     for i, item in enumerate(items):
                         menu_rect = pygame.Rect(
-                            (SCREEN_WIDTH - menu_width) // 2,
+                            (self.screen_width - menu_width) // 2,
                             menu_start_y + i * (menu_item_height + 20),
                             menu_width,
                             menu_item_height
@@ -282,7 +285,7 @@ class BrickBreakerMenu:
                         items = self.multiplayer_items
                         for i, item in enumerate(items):
                             menu_rect = pygame.Rect(
-                                (SCREEN_WIDTH - menu_width) // 2,
+                                (self.screen_width - menu_width) // 2,
                                 menu_start_y + i * (menu_item_height + 20),
                                 menu_width,
                                 menu_item_height
@@ -300,7 +303,7 @@ class BrickBreakerMenu:
                     else:
                         for i, item in enumerate(self.menu_items):
                             menu_rect = pygame.Rect(
-                                (SCREEN_WIDTH - menu_width) // 2,
+                                (self.screen_width - menu_width) // 2,
                                 menu_start_y + i * (menu_item_height + 20),
                                 menu_width,
                                 menu_item_height
@@ -331,6 +334,9 @@ class BrickBreakerMenu:
                                     from How import HowToPlayScreen
                                     how_to_play = HowToPlayScreen(self.screen)
                                     how_to_play.run()
+                                elif item == "Settings":
+                                    settings_ui = SettingsUI(self.screen, return_callback=lambda screen: self.screen)
+                                    self.screen = settings_ui.run()
                                 elif item == "Quit":
                                     running = False
                                 break
