@@ -25,10 +25,23 @@ class BrickBreakerMenu:
         self.screen_height = SCREEN_HEIGHT
 
         pygame.display.set_caption("BrickBreaker Together")
+           # Get the absolute path to the audio directory
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        self.audio_dir = os.path.join(current_dir, 'audio')  # Store as instance variable
+        
+        # Load sound effects
+        try:
+            button_click_path = os.path.join(self.audio_dir, 'button_click.wav')
+            self.button_click_sound = pygame.mixer.Sound(button_click_path)
+            self.button_click_sound.set_volume(0.5)  # Set volume to 50%
+        except Exception as e:
+            print(f"Could not load button click sound: {e}")
+            self.button_click_sound = None
+        
         
         # Load and play menu music
         try:
-            music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+            music_path = os.path.join(self.audio_dir, 'background_music.mp3')
             pygame.mixer.music.load(music_path)
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(-1)
@@ -293,6 +306,9 @@ class BrickBreakerMenu:
                                 menu_item_height
                             )
                             if menu_rect.collidepoint(mouse_pos):
+                                                         # Play button click sound
+                                if self.button_click_sound:
+                                    self.button_click_sound.play()
                                 if i == 0:
                                     if self.current_user:
                                         print(f"Clicked user button for {self.current_user.capitalize()}")
@@ -303,7 +319,7 @@ class BrickBreakerMenu:
                                     game = Game(self.screen)
                                     game.run()
                                     try:
-                                        music_path = os.path.join('Py', 'audio', 'background_music.mp3')
+                                        music_path = os.path.join(self.audio_dir, 'background_music.mp3')
                                         pygame.mixer.music.load(music_path)
                                         pygame.mixer.music.set_volume(0.5)
                                         pygame.mixer.music.play(-1)
