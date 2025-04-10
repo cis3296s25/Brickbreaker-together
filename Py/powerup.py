@@ -54,7 +54,16 @@ class PowerUp:
             game.balls.extend(new_balls)
 
         elif self.type == 'extra_life':
-            game.lives = min(game.lives + 1, 5)
+            game.lives += 1
+            # Check if we need to switch to reborn music (when recovering from danger)
+            if game.lives > 1 and game.current_music == 'danger':
+                try:
+                    pygame.mixer.music.load(game.reborn_music_path)
+                    pygame.mixer.music.set_volume(0.7)  # Set reborn music volume to 70%
+                    pygame.mixer.music.play(-1)
+                    game.current_music = 'reborn'
+                except Exception as e:
+                    print(f"Could not load reborn music: {e}")
 
         elif self.type == 'slow_ball':
             game.speed_modifier = 0.8  # Reduce ball speed to 80%
