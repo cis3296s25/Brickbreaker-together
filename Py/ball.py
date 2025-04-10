@@ -66,6 +66,10 @@ class Ball:
 
         # Bounce off paddle
         if self.rect.colliderect(paddle.rect):
+            # Play paddle hit sound
+            if hasattr(game, 'paddle_hit_sound') and game.paddle_hit_sound:
+                game.paddle_hit_sound.play()
+                
             # Calculate hit position relative to paddle center
             hit_pos = (self.rect.centerx - paddle.rect.centerx) / (PADDLE_WIDTH // 2)
             angle = hit_pos * (math.pi / 3)  # Max angle deviation = 60 degrees
@@ -79,6 +83,10 @@ class Ball:
         # Bounce off bricks
         for brick in bricks[:]:
             if self.rect.colliderect(brick.rect): # Check if the brick is colliding
+                # Play brick hit sound
+                if hasattr(game, 'brick_hit_sound') and game.brick_hit_sound:
+                    game.brick_hit_sound.play()
+                    
                 if game.bomb_ready:
                 # Trigger explosion (destroy surrounding bricks)
                     explosion_radius = 1  # 3x3 grid

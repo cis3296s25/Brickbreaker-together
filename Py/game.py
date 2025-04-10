@@ -29,7 +29,7 @@ class Game:
         
         # Load sound effects
         try:
-            brick_hit_path = os.path.join(self.audio_dir, 'brick_hit.wav')
+            brick_hit_path = os.path.join(self.audio_dir, 'hit.wav')  # Changed from brick_hit.wav to hit.wav
             self.brick_hit_sound = pygame.mixer.Sound(brick_hit_path)
             self.brick_hit_sound.set_volume(0.7)  # Set volume to 70%
             
@@ -42,7 +42,7 @@ class Game:
             self.paddle_hit_sound.set_volume(2)  # Set volume to 200%
             
             # Add powerup collect sound
-            powerup_path = os.path.join(self.audio_dir, 'but.wav')  # Using but.wav for powerup sound
+            powerup_path = os.path.join(self.audio_dir, 'but.wav')
             self.powerup_sound = pygame.mixer.Sound(powerup_path)
             self.powerup_sound.set_volume(0.7)  # Set volume to 70%
             
@@ -61,14 +61,16 @@ class Game:
         # Store music paths
         self.game_music_path = os.path.join(self.audio_dir, 'game_music.mp3')
         self.danger_music_path = os.path.join(self.audio_dir, 'danger_music.mp3')
-        self.reborn_music_path = os.path.join(self.audio_dir, 'd.mp3')  # Using d.mp3 as reborn music
+        self.reborn_music_path = os.path.join(self.audio_dir, 'd.mp3')
         self.current_music = 'normal'  # Track current music state ('normal', 'danger', or 'reborn')
             
         try:
-            self.game_music_path = os.path.join('Py', 'audio', 'game_music.mp3')
+            # Initialize the mixer
+            pygame.mixer.init()
+            # Load and play the game music
             pygame.mixer.music.load(self.game_music_path)
             pygame.mixer.music.set_volume(0.3)
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.play(-1)  # -1 means loop indefinitely
         except Exception as e:
             print(f"Could not load game music: {e}")
 
