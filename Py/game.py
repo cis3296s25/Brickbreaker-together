@@ -9,6 +9,7 @@ from brick import Brick
 from ui import UI
 from powerup import PowerUp
 from levels import LEVELS
+from settings_ui import SettingsUI
 
 class Game:
     def __init__(self, screen):
@@ -159,7 +160,9 @@ class Game:
                             self.isPaused = False
                             pygame.mixer.music.unpause()
                         elif menu_action == 'Settings':
-                            pass
+                            settings_ui = SettingsUI(self.screen, return_callback=lambda screen: self.screen)
+                            self.screen = settings_ui.run()
+                            self.isPaused = True
                         elif menu_action == 'Main Menu':
                             try:
                                 menu_music_path = os.path.join(self.audio_dir, 'background_music.mp3')
