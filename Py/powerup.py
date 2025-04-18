@@ -7,7 +7,7 @@ class PowerUp:
         # Scale powerup size with screen
         powerup_size = int(30 * SCALE_FACTOR)
         self.rect = pygame.Rect(x, y, powerup_size, powerup_size)
-        self.type = random.choice(['bomb', 'multi_ball', 'extra_life', 'slow_ball'])
+        self.type = random.choice(['bomb', 'multi_ball', 'extra_life', 'slow_ball','paddle_big', 'paddle_small'])
         self.speed = int(3 * SCALE_FACTOR)
 
         self.color_map = {
@@ -15,6 +15,8 @@ class PowerUp:
             'multi_ball': (52, 152, 219), # Blue
             'extra_life': (46, 204, 113), # Green
             'slow_ball': (241, 196, 15),  # Yellow
+            'paddle_big': (155, 89, 182),    # Purple
+            'paddle_small': (192, 57, 43),  # Dark red
         }
 
         self.label_map = {
@@ -22,6 +24,8 @@ class PowerUp:
             'multi_ball': 'M',
             'extra_life': '+',
             'slow_ball': 'S',
+            'paddle_big': '>>',
+            'paddle_small': '<<',
         }
     def update(self):
         self.rect.y += self.speed
@@ -67,4 +71,20 @@ class PowerUp:
 
         elif self.type == 'slow_ball':
             game.speed_modifier = 0.8  # Reduce ball speed to 80%
-            game.slow_until = pygame.time.get_ticks() + 3000  # for 3 seconds
+            game.slow_until = pygame.time.get_ticks() + 30000  # for 30 seconds
+        
+        elif self.type == 'paddle_big':
+            new_width = min(game.paddle.rect.width + int(60 * SCALE_FACTOR), int(400 * SCALE_FACTOR))
+            center = game.paddle.rect.centerx
+            game.paddle.rect.width = new_width
+            game.paddle.rect.centerx = center
+            game.paddle.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+
+        elif self.type == 'paddle_small':
+            new_width = max(game.paddle.rect.width - int(60 * SCALE_FACTOR), int(60 * SCALE_FACTOR))
+            center = game.paddle.rect.centerx
+            game.paddle.rect.width = new_width
+            game.paddle.rect.centerx = center
+            game.paddle.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
