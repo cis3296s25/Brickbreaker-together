@@ -242,7 +242,7 @@ class Game:
         if self.speed_modifier < 1.0 and pygame.time.get_ticks() > self.slow_until:
             self.speed_modifier = 1.0
 
-        if not self.bricks and self.isGameInProgress:
+        if not any(brick.active and brick.type != 'indestructible' for brick in self.bricks) and self.isGameInProgress:
             self.isGameInProgress = False
             self.show_level_complete = True
 
