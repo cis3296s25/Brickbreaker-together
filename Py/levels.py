@@ -12,6 +12,8 @@ LEVELS = [
         [1] + [0]*18 + [1],
         [1] + [0]*18 + [1],
         [1]*20,
+        [1]*10 + [2] + [1]*9  # An indestructible brick in the middle
+
     ],
 
     # Level 3: Pyramid

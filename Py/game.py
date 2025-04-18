@@ -309,7 +309,6 @@ class Game:
         layout = LEVELS[self.current_level % len(LEVELS)]
 
         self.bricks = []
-        # Dynamically center based on columns
         num_cols = max(len(row) for row in layout)
         total_width = num_cols * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
         start_x = (SCREEN_WIDTH - total_width) // 2
@@ -317,11 +316,17 @@ class Game:
 
         for row_idx, row in enumerate(layout):
             for col_idx, brick_type in enumerate(row):
-                if brick_type:
-                    x = start_x + col_idx * (BRICK_WIDTH + BRICK_PADDING)
-                    y = start_y + row_idx * (BRICK_HEIGHT + BRICK_PADDING)
+                if brick_type == 0:
+                    continue  # No brick
+                x = start_x + col_idx * (BRICK_WIDTH + BRICK_PADDING)
+                y = start_y + row_idx * (BRICK_HEIGHT + BRICK_PADDING)
+                
+                if brick_type == 1:
                     color = random.choice(self.brick_colors)
-                    self.bricks.append(Brick(x, y, color))
+                    self.bricks.append(Brick(x, y, color, brick_type='normal'))
+                elif brick_type == 2:
+                    color = (128, 128, 128)  # Gray color for indestructible
+                    self.bricks.append(Brick(x, y, color, brick_type='indestructible'))
 
     def reset_game(self):
         self.lives = 3
