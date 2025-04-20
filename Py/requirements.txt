@@ -1,0 +1,10 @@
+pygame
+flask
+flask-socketio
+eventlet
+mysql-connector-python
+bcrypt
+python-socketio
+python-engineio
+requests
+websocket-c
