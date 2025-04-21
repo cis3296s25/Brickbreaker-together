@@ -2,8 +2,13 @@ import pygame
 import sys
 import random
 import time
+import os
 from multiplayer_pause import MultiplayerPauseMenu
 from settings import *
+
+# Debug print to check pygame mixer
+print("Pygame version:", pygame.version.ver)
+print("Pygame mixer initialized:", pygame.mixer.get_init())
 
 # Initialize Pygame
 pygame.init()
@@ -184,6 +189,40 @@ class PowerUp:
 
 class Game:
     def __init__(self, screen):
+        print("Starting multiplayer game initialization...")
+        pygame.mixer.init()  # Initialize mixer right away
+        
+        # Load audio files directly in __init__
+        try:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            audio_dir = os.path.join(current_dir, "audio")
+            print(f"Audio directory: {audio_dir}")
+            
+            # Load and set sound effects
+            self.brick_hit_sound = pygame.mixer.Sound(os.path.join(audio_dir, "brick.wav"))  # Changed filename
+            self.paddle_hit_sound = pygame.mixer.Sound(os.path.join(audio_dir, "paddle.wav"))  # Changed filename
+            self.powerup_sound = pygame.mixer.Sound(os.path.join(audio_dir, "powerup.wav"))
+            self.game_over_sound = pygame.mixer.Sound(os.path.join(audio_dir, "gameover.wav"))  # Changed filename
+            
+            # Set volumes
+            self.brick_hit_sound.set_volume(0.3)
+            self.paddle_hit_sound.set_volume(0.3)
+            self.powerup_sound.set_volume(0.3)
+            self.game_over_sound.set_volume(0.3)
+            
+            # Load and play background music
+            pygame.mixer.music.load(os.path.join(audio_dir, "bgm.mp3"))  # Changed filename
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(-1)
+            print("Audio initialization successful!")
+            
+        except Exception as e:
+            print(f"Error loading audio: {e}")
+            self.brick_hit_sound = None
+            self.paddle_hit_sound = None
+            self.powerup_sound = None
+            self.game_over_sound = None
+
         self.screen = screen
         self.bounds = pygame.Rect((SCREEN_WIDTH - GAME_WIDTH) // 2, (SCREEN_HEIGHT - GAME_HEIGHT) // 2, GAME_WIDTH, GAME_HEIGHT)
         self.player1 = Paddle(self.bounds.centerx - PADDLE_WIDTH // 2, self.bounds.top + 20, PLAYER1_COLOR)
@@ -282,11 +321,12 @@ class Game:
         # Update power-ups
         for powerup in self.powerups[:]:
             powerup.update()
-
             if powerup.rect.colliderect(self.player1.rect):
+                self.play_sound("powerup")
                 powerup.apply(self, player=1)
                 self.powerups.remove(powerup)
             elif powerup.rect.colliderect(self.player2.rect):
+                self.play_sound("powerup")
                 powerup.apply(self, player=2)
                 self.powerups.remove(powerup)
             elif powerup.rect.top > self.bounds.bottom:
@@ -302,20 +342,26 @@ class Game:
         # Ball 1 collision logic
         if self.ball1.active:
             result = self.ball1.check_collision(self.bounds, self.player1, self.player2, self.bricks, True)
-            if result == "hit_top":  # Player 1's ball hitting top wall
+            if result == "hit_top":
                 self.ball1.active = False
                 self.lives1 -= 1
             elif result == "brick":
+                self.play_sound("brick")
                 self.player1.score += 10
+            elif result == "paddle":
+                self.play_sound("paddle")
 
         # Ball 2 collision logic
         if self.ball2.active:
             result = self.ball2.check_collision(self.bounds, self.player1, self.player2, self.bricks, False)
-            if result == "hit_bottom":  # Player 2's ball hitting bottom wall
+            if result == "hit_bottom":
                 self.ball2.active = False
                 self.lives2 -= 1
             elif result == "brick":
+                self.play_sound("brick")
                 self.player2.score += 10
+            elif result == "paddle":
+                self.play_sound("paddle")
 
         # Respawn balls if inactive and lives remain
         if not self.ball1.active and self.lives1 > 0:
@@ -341,6 +387,7 @@ class Game:
                 self.winner = "PLAYER 2 WINS"
             else:
                 self.winner = "DRAW"
+            self.play_sound("game_over")
 
     def draw_ui(self):
         # UI panels
@@ -415,6 +462,25 @@ class Game:
             self.screen.blit(tip, (SCREEN_WIDTH // 2 - tip.get_width() // 2, SCREEN_HEIGHT // 2 + 60))
 
         pygame.display.flip()
+
+    def play_sound(self, sound_type):
+        """Play different sound effects"""
+        try:
+            if sound_type == "brick" and self.brick_hit_sound:
+                print("Playing brick sound")
+                self.brick_hit_sound.play()
+            elif sound_type == "paddle" and self.paddle_hit_sound:
+                print("Playing paddle sound")
+                self.paddle_hit_sound.play()
+            elif sound_type == "powerup" and self.powerup_sound:
+                print("Playing powerup sound")
+                self.powerup_sound.play()
+            elif sound_type == "game_over" and self.game_over_sound:
+                print("Playing game over sound")
+                pygame.mixer.music.stop()
+                self.game_over_sound.play()
+        except Exception as e:
+            print(f"Error playing {sound_type} sound: {e}")
 
 
 def run_game(screen):
