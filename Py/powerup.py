@@ -78,13 +78,21 @@ class PowerUp:
             center = game.paddle.rect.centerx
             game.paddle.rect.width = new_width
             game.paddle.rect.centerx = center
-            game.paddle.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+            # Keep paddle inside screen bounds after resizing
+            if game.paddle.rect.left < 0:
+                game.paddle.rect.left = 0
+            if game.paddle.rect.right > SCREEN_WIDTH:
+                game.paddle.rect.right = SCREEN_WIDTH
 
         elif self.type == 'paddle_small':
             new_width = max(game.paddle.rect.width - int(60 * SCALE_FACTOR), int(60 * SCALE_FACTOR))
             center = game.paddle.rect.centerx
             game.paddle.rect.width = new_width
             game.paddle.rect.centerx = center
-            game.paddle.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+            # Keep paddle inside screen bounds after resizing
+            if game.paddle.rect.left < 0:
+                game.paddle.rect.left = 0
+            if game.paddle.rect.right > SCREEN_WIDTH:
+                game.paddle.rect.right = SCREEN_WIDTH
 
 
