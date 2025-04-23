@@ -247,6 +247,7 @@ class Game:
         self.animation_speed = 0.05
         self.paused = False
         self.pause_menu = MultiplayerPauseMenu()
+        self.waiting_for_start = True  # NEW: Wait until players press SPACE to start
 
     def create_bricks(self):
         area_width = BRICK_COLS * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
@@ -263,6 +264,14 @@ class Game:
                 self.bricks.append({'rect': rect, 'active': True, 'color': BRICK_COLORS[row % len(BRICK_COLORS)]})
 
     def handle_input(self, events):
+        if self.waiting_for_start:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                self.waiting_for_start = False  # NEW: Player starts the game by pressing SPACE
+                self.countdown = 3  # Reset countdown
+                self.countdown_timer = pygame.time.get_ticks()
+            return None  # Skip inputs until the game starts
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
@@ -293,6 +302,9 @@ class Game:
         return None
 
     def update(self):
+        if self.waiting_for_start:
+            return  # Do not update game logic yet if waiting to start
+        
         if self.paused:
             return
 
@@ -416,6 +428,19 @@ class Game:
         draw_stats(SCREEN_WIDTH - UI_WIDTH // 2, SCREEN_HEIGHT // 3, "PLAYER 2", PLAYER2_COLOR, self.player2.score, self.lives2)
 
     def draw(self):
+        if self.waiting_for_start:
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))  # Semi-transparent overlay
+            self.screen.blit(overlay, (0, 0))
+
+            start_text = title_font.render("Press SPACE to Start", True, TEXT_COLOR)
+            self.screen.blit(start_text, (
+                SCREEN_WIDTH // 2 - start_text.get_width() // 2,
+                SCREEN_HEIGHT // 2 - start_text.get_height() // 2
+            ))
+            pygame.display.flip()
+            return  # Skip further drawing until game starts
+
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_ui()
         pygame.draw.rect(self.screen, (0, 0, 0), self.bounds, border_radius=12)
