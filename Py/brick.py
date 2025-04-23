@@ -31,10 +31,3 @@ class Brick:
         # Dark bottom & right border
         pygame.draw.line(screen, self.dark_color, self.rect.bottomleft, self.rect.bottomright, 2)
         pygame.draw.line(screen, self.dark_color, self.rect.topright, self.rect.bottomright, 2)
-
-        # Draw 'X' on indestructible bricks
-        if self.type == 'indestructible':
-            font = pygame.font.Font(None, int(24 * SCALE_FACTOR))
-            label_rect = label.get_rect(center=self.rect.center)
-            screen.blit(label, label_rect)
-
