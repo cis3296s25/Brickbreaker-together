@@ -313,7 +313,8 @@ class Game:
         total_width = num_cols * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING
         start_x = (SCREEN_WIDTH - total_width) // 2
         start_y = int(150 * SCALE_FACTOR)
-
+        
+        self.powerups.clear() # Clear powerups when creating new bricks
         for row_idx, row in enumerate(layout):
             for col_idx, brick_type in enumerate(row):
                 if brick_type == 0:
