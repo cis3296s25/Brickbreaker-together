@@ -87,9 +87,23 @@ class Ball:
                 if hasattr(game, 'brick_hit_sound') and game.brick_hit_sound:
                     game.brick_hit_sound.play()
 
-                # Skip destruction if brick is indestructible
                 if getattr(brick, 'type', 'normal') == 'indestructible':
-                    self.dy = -self.dy  # Just bounce
+                    # Calculate proper side-based bounce logic (like normal bricks)
+                    overlap_left = self.rect.right - brick.rect.left
+                    overlap_right = brick.rect.right - self.rect.left
+                    overlap_top = self.rect.bottom - brick.rect.top
+                    overlap_bottom = brick.rect.bottom - self.rect.top
+
+                    min_overlap = min(overlap_left, overlap_right, overlap_top, overlap_bottom)
+
+                    if min_overlap == overlap_left:
+                        self.dx = -abs(self.dx)
+                    elif min_overlap == overlap_right:
+                        self.dx = abs(self.dx)
+                    elif min_overlap == overlap_top:
+                        self.dy = -abs(self.dy)
+                    elif min_overlap == overlap_bottom:
+                        self.dy = abs(self.dy)
                     return 0
 
                 if game.bomb_ready:
