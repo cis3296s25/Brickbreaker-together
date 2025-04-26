@@ -6,5 +6,3 @@ mysql-connector-python
 bcrypt
 python-socketio
 python-engineio
-requests
-websocket-c
