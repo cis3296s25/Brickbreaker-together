@@ -16,14 +16,21 @@ git clone https://github.com/cis3296s25/Brickbreaker-together
 cd Brickbreaker-together
 ```
 
-2. Install required dependencies:
+2. create a new env and activate it
 ```bash
-pip install pygame
+python3 -m venv venv 
+source venv/bin/activate
 ```
 
-3. Run the game:
+3. install requirements
 ```bash
-cd Py
+cd Py/
+pip install -r requirements.txt
+pip install requests websocket-client
+```
+
+4. Run the game:
+```bash
 python main.py
 ```
 ## Features
